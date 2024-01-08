@@ -9,13 +9,13 @@
     "dist"
   ],
   "license": "MIT",
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
     "plugin"
   ],
   "peerDependencies": {
-    "koishi": "^4.16.0"
+    "koishi": "^4.16.0",
+    "koishi-plugin-word-core": "~0.0.6"
   }
 }
