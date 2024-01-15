@@ -16,6 +16,6 @@
   ],
   "peerDependencies": {
     "koishi": "^4.16.0",
-    "koishi-plugin-word-core": "~0.0.6"
+    "koishi-plugin-word-core": "~0.0.7"
   }
 }
