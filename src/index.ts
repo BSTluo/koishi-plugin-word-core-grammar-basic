@@ -55,7 +55,7 @@ export function apply(ctx: Context) {
 
 
       const now: number = number + Number(addNum);
-      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
+      const ok = await ctx.word.user.updateItemTemp(uid, saveCell, item, now);
 
       if (ok)
       {
@@ -66,7 +66,6 @@ export function apply(ctx: Context) {
       }
     });
 
-    
     // 减少物品
     // 语法: (-:物品名称:数量:谁？)
     // 语法: (-:物品名称:数量~数量:谁？)
