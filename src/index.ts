@@ -77,25 +77,25 @@ export function apply(ctx: Context) {
       const item = inData.args[0];
       const number = await ctx.word.user.getItem(uid, saveCell, item);
 
-      const addNumTemp = inData.args[1];
-      let addNum = 0;
-      if (!/^\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
+      const rmNumTemp = inData.args[1];
+      let rmNum = 0;
+      if (!/^\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
 
       switch (true)
       {
-        case (/^\d+$/.test(addNumTemp)): {
-          addNum = Number(addNum);
+        case (/^\d+$/.test(rmNumTemp)): {
+          rmNum = Number(rmNum);
           break;
         }
 
-        case (/^\d+\~\d+$/.test(addNumTemp)): {
-          const matchData = addNumTemp.match(/^(\d+)\~(\d+)$/);
-          addNum = randomNumber(Number(matchData[1]), Number(matchData[2]));
+        case (/^\d+\~\d+$/.test(rmNumTemp)): {
+          const matchData = rmNumTemp.match(/^(\d+)\~(\d+)$/);
+          rmNum = randomNumber(Number(matchData[1]), Number(matchData[2]));
           break;
         }
-        case (/^\d+%$/.test(addNumTemp)): {
-          const matchData = addNumTemp.match(/^(\d+)%$/);
-          addNum = number * Number(matchData[1]);
+        case (/^\d+%$/.test(rmNumTemp)): {
+          const matchData = rmNumTemp.match(/^(\d+)%$/);
+          rmNum = number * Number(matchData[1]);
           break;
         }
 
@@ -104,8 +104,8 @@ export function apply(ctx: Context) {
 
       // 我觉得需要个数据缓存，而不是刚刚完成就保存
 
-      const now: number = number - Number(addNum);
-      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
+      const now: number = number - Number(rmNum);
+      const ok = await ctx.word.user.updateItemTemp(uid, saveCell, item, now);
 
       if (ok)
       {
