@@ -16,13 +16,17 @@ export function apply(ctx: Context) {
   ctx.inject(['word'], ctx => {
     if (!ctx.word) { return; }
 
+    // 谁可以为that
+
     // 增加物品
     // 语法: (+:物品名称:数量:谁？)
     // 语法: (+:物品名称:数量~数量:谁？)
     // 语法: (+:物品名称:数量%:谁？)
+    // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('+', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
-      const uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      let uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
       const number = await ctx.word.user.getItem(uid, saveCell, item);
@@ -70,9 +74,11 @@ export function apply(ctx: Context) {
     // 语法: (-:物品名称:数量:谁？)
     // 语法: (-:物品名称:数量~数量:谁？)
     // 语法: (-:物品名称:数量%:谁？)
+    // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('-', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
-      const uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      let uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
       const number = await ctx.word.user.getItem(uid, saveCell, item);
@@ -112,8 +118,66 @@ export function apply(ctx: Context) {
         return String(now);
       } else
       {
-        throw `物品 [${item}] 添加失败`;
+        return inData.parPack.end(`物品 [${item}] 减少失败`)
       }
     });
+
+    // 判断物品数量
+    // 语法: (?:物品名称:关系:数量:信息？:谁？)
+    // 谁可以为that，匹配问中第一个at的id
+    // 不写信息和谁的时候是表明为当前语句的判断
+    ctx.word.statement.addStatement('?', async (inData, session) => {
+      const saveCell = inData.wordData.saveDB;
+      let uid = (inData.args.length >= 5) ? inData.args[4] : session.uid;
+      if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+      const item = inData.args[0];
+      const number = await ctx.word.user.getItem(uid, saveCell, item);
+
+      const inputNumber = inData.args[2];
+      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end(); }
+
+      const relationship = inData.args[1];
+      if (relationship == '=' || relationship == '>' || relationship == '<' || relationship == '<>' || relationship == '>=' || relationship == '<=')
+      {
+        // 判断符号符合预期
+      } else
+      {
+        return inData.parPack.end();
+      }
+
+      if (eval(`${number}${relationship}${inputNumber}`))
+      {
+        if (inData.args.length >= 4)
+        {
+          return inData.args[3]
+        }
+        else
+        {
+          return ''
+        }
+      }
+    });
+
+    // 延迟
+    ctx.word.statement.addStatement('&', async (inData, session) => { });
+
+    // 返回背包数量
+    ctx.word.statement.addStatement('#', async (inData, session) => { });
+
+    // 概率判断
+    ctx.word.statement.addStatement('%', async (inData, session) => { });
+
+    // 我的name
+    ctx.word.statement.addStatement('@this', async (inData, session) => { });
+
+    // 我的id
+    ctx.word.statement.addStatement('#this', async (inData, session) => { });
+
+    // 对方的name
+    ctx.word.statement.addStatement('@that', async (inData, session) => { });
+
+    // 对方的id
+    ctx.word.statement.addStatement('#that', async (inData, session) => { });
   });
 }
