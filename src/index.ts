@@ -1,4 +1,4 @@
-import { Context, Schema } from 'koishi';
+import { Context, Schema, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
@@ -19,9 +19,9 @@ export function apply(ctx: Context) {
     // 谁可以为that
 
     // 增加物品
-    // 语法: (+:物品名称:数量:谁？)
-    // 语法: (+:物品名称:数量~数量:谁？)
-    // 语法: (+:物品名称:数量%:谁？)
+    // 语法: (+:物品名称:数量:用户id?)
+    // 语法: (+:物品名称:数量~数量:用户id?)
+    // 语法: (+:物品名称:数量%:用户id?)
     // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('+', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
@@ -49,7 +49,7 @@ export function apply(ctx: Context) {
         }
         case (/^\d+%$/.test(addNumTemp)): {
           const matchData = addNumTemp.match(/^(\d+)%$/);
-          addNum = number * Number(matchData[1]);
+          addNum = number * Number(matchData[1]) / 100;
           break;
         }
 
@@ -71,9 +71,9 @@ export function apply(ctx: Context) {
     });
 
     // 减少物品
-    // 语法: (-:物品名称:数量:谁？)
-    // 语法: (-:物品名称:数量~数量:谁？)
-    // 语法: (-:物品名称:数量%:谁？)
+    // 语法: (-:物品名称:数量:用户id?)
+    // 语法: (-:物品名称:数量~数量:用户id?)
+    // 语法: (-:物品名称:数量%:用户id?)
     // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('-', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
@@ -118,13 +118,14 @@ export function apply(ctx: Context) {
         return String(now);
       } else
       {
-        return inData.parPack.end(`物品 [${item}] 减少失败`)
+        return inData.parPack.end(`物品 [${item}] 减少失败`);
       }
     });
 
     // 判断物品数量
-    // 语法: (?:物品名称:关系:数量:信息？:谁？)
+    // 语法: (?:物品名称:关系:数量:信息?:用户id?)
     // 谁可以为that，匹配问中第一个at的id
+    // 不写可选元素时，目标为整个语句
     // 不写信息和谁的时候是表明为当前语句的判断
     ctx.word.statement.addStatement('?', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
@@ -138,7 +139,7 @@ export function apply(ctx: Context) {
       if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end(); }
 
       const relationship = inData.args[1];
-      if (relationship == '=' || relationship == '>' || relationship == '<' || relationship == '<>' || relationship == '>=' || relationship == '<=')
+      if (relationship == '=' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
       {
         // 判断符号符合预期
       } else
@@ -150,34 +151,109 @@ export function apply(ctx: Context) {
       {
         if (inData.args.length >= 4)
         {
-          return inData.args[3]
+          if (inData.args[3] == '')
+          {
+            return inData.parPack.next();
+          } else { return inData.args[3]; }
         }
         else
         {
-          return ''
+          return '';
+        }
+      }
+      else
+      {
+        if (inData.args.length >= 4)
+        {
+          if (inData.args[3] == '')
+          {
+            return inData.parPack.next();
+          } else { return ''; }
+        } else
+        {
+          return inData.parPack.next();
         }
       }
     });
 
-    // 延迟
-    ctx.word.statement.addStatement('&', async (inData, session) => { });
+    // 延迟发送信息
+    // 语法(&:时间:消息？)
+    // 不写可选元素时，目标为整个语句
+    // 单位是s
+    ctx.word.statement.addStatement('&', async (inData, session) => {
+      if (!/^\d+$/.test(inData.args[0])) { return inData.parPack.end('时间格式错误'); }
+      await sleep(Number(inData.args[0]) * 10);
+      if (inData.args.length > 1)
+      {
+        return inData.args[1];
+      } else
+      {
+        return '';
+      }
+    });
 
     // 返回背包数量
-    ctx.word.statement.addStatement('#', async (inData, session) => { });
+    // 语法：(#:物品名称:用户id?)
+    // 谁可以为that，匹配问中第一个at的id
+    ctx.word.statement.addStatement('#', async (inData, session) => {
+      let uid = (inData.args.length >= 2) ? inData.args[1] : session.uid;
+      if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+      const saveCell = inData.wordData.saveDB;
+      const item = inData.args[0];
+      const number = await ctx.word.user.getItem(uid, saveCell, item);
+      return String(number);
+    });
 
     // 概率判断
-    ctx.word.statement.addStatement('%', async (inData, session) => { });
+    // 语法：(%:概率(0~100):消息？)
+    ctx.word.statement.addStatement('%', async (inData, session) => {
+      if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 0) { return inData.parPack.end('概率格式错误'); }
+      const random = (minNumber: number, maxNumber: number): number => {
+        return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+      };
+
+      const randomNumber = random(0, 100);
+
+      let msg = '';
+      if (inData.args.length > 1) { msg = inData.args[1]; }
+
+      if (randomNumber > Number(inData.args[0]))
+      {
+
+        return msg;
+      } else
+      {
+        if (inData.args.length > 1)
+        {
+          return '';
+        } else
+        {
+          return inData.parPack.end('判定失败');
+        }
+      }
+    });
 
     // 我的name
-    ctx.word.statement.addStatement('@this', async (inData, session) => { });
+    ctx.word.statement.addStatement('@this', async (inData, session) => {
+      return session.username;
+    });
 
     // 我的id
-    ctx.word.statement.addStatement('#this', async (inData, session) => { });
+    ctx.word.statement.addStatement('#this', async (inData, session) => {
+      return session.uid;
+    });
 
     // 对方的name
-    ctx.word.statement.addStatement('@that', async (inData, session) => { });
+    ctx.word.statement.addStatement('@that', async (inData, session) => {
+      if (!inData.matchs.hasOwnProperty('name')) { return; }
+      return inData.matchs.name[0];
+    });
 
     // 对方的id
-    ctx.word.statement.addStatement('#that', async (inData, session) => { });
+    ctx.word.statement.addStatement('#that', async (inData, session) => {
+      if (!inData.matchs.hasOwnProperty('id')) { return; }
+      return inData.matchs.id[0];
+    });
   });
 }
