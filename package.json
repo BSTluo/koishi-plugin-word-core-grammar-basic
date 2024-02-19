@@ -27,5 +27,9 @@
   },
   "devDependencies": {
     "koishi-plugin-word-core": "0.0.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BSTluo/koishi-plugin-word-core-grammar-basic.git"
   }
 }
