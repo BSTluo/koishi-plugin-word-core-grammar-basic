@@ -25,7 +25,7 @@ export function apply(ctx: Context) {
     // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('+', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
-      let uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
@@ -44,7 +44,9 @@ export function apply(ctx: Context) {
 
         case (/^\d+\~\d+$/.test(addNumTemp)): {
           const matchData = addNumTemp.match(/^(\d+)\~(\d+)$/);
+          
           addNum = randomNumber(Number(matchData[1]), Number(matchData[2]));
+
           break;
         }
         case (/^\d+%$/.test(addNumTemp)): {
@@ -56,14 +58,13 @@ export function apply(ctx: Context) {
         default: { break; }
       }
 
-
-
       const now: number = number + Number(addNum);
-      const ok = await ctx.word.user.updateItemTemp(uid, saveCell, item, now);
+
+      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
       if (ok)
       {
-        return String(now);
+        return String(addNum);
       } else
       {
         throw `物品 [${item}] 添加失败`;
@@ -77,7 +78,7 @@ export function apply(ctx: Context) {
     // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('-', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
-      let uid = (inData.args.length >= 3) ? inData.args[2] : session.uid;
+      let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
@@ -111,11 +112,11 @@ export function apply(ctx: Context) {
       // 我觉得需要个数据缓存，而不是刚刚完成就保存
 
       const now: number = number - Number(rmNum);
-      const ok = await ctx.word.user.updateItemTemp(uid, saveCell, item, now);
+      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
       if (ok)
       {
-        return String(now);
+        return String(rmNum);
       } else
       {
         return inData.parPack.end(`物品 [${item}] 减少失败`);
@@ -129,7 +130,7 @@ export function apply(ctx: Context) {
     // 不写信息和谁的时候是表明为当前语句的判断
     ctx.word.statement.addStatement('?', async (inData, session) => {
       const saveCell = inData.wordData.saveDB;
-      let uid = (inData.args.length >= 5) ? inData.args[4] : session.uid;
+      let uid = (inData.args.length >= 5) ? inData.args[4] : session.userId;
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
@@ -196,12 +197,13 @@ export function apply(ctx: Context) {
     // 语法：(#:物品名称:用户id?)
     // 谁可以为that，匹配问中第一个at的id
     ctx.word.statement.addStatement('#', async (inData, session) => {
-      let uid = (inData.args.length >= 2) ? inData.args[1] : session.uid;
+      let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const saveCell = inData.wordData.saveDB;
       const item = inData.args[0];
       const number = await ctx.word.user.getItem(uid, saveCell, item);
+
       return String(number);
     });
 
@@ -241,7 +243,7 @@ export function apply(ctx: Context) {
 
     // 我的id
     ctx.word.statement.addStatement('#this', async (inData, session) => {
-      return session.uid;
+      return session.userId;
     });
 
     // 对方的name
