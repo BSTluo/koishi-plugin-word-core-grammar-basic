@@ -44,7 +44,7 @@ export function apply(ctx: Context) {
 
         case (/^\d+\~\d+$/.test(addNumTemp)): {
           const matchData = addNumTemp.match(/^(\d+)\~(\d+)$/);
-          
+
           addNum = randomNumber(Number(matchData[1]), Number(matchData[2]));
 
           break;
@@ -112,6 +112,7 @@ export function apply(ctx: Context) {
       // 我觉得需要个数据缓存，而不是刚刚完成就保存
 
       const now: number = number - Number(rmNum);
+      if (now < 0) { return inData.parPack.end(`物品 [${item}] 数量不足`); }
       const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
       if (ok)
@@ -259,12 +260,16 @@ export function apply(ctx: Context) {
     });
 
     // 隐式返回
-    ctx.word.statement.addStatement('!', async (inData, session) => {
+    ctx.word.statement.addStatement('!', async () => {
       return '';
     });
 
     // cd装置
-    
+    ctx.word.statement.addStatement('^', async (inData, session) => {
+
+    });
+
     // 输入数
+    // 四则
   });
 }
