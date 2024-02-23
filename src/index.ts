@@ -258,6 +258,13 @@ export function apply(ctx: Context) {
       return inData.matchs.id[0];
     });
 
+    // 隐式返回
+    ctx.word.statement.addStatement('!', async (inData, session) => {
+      return '';
+    });
+
+    // cd装置
+    
     // 输入数
   });
 }
