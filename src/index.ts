@@ -38,7 +38,7 @@ export function apply(ctx: Context) {
       switch (true)
       {
         case (/^\d+$/.test(addNumTemp)): {
-          addNum = Number(addNum);
+          addNum = Number(addNumTemp);
           break;
         }
 
@@ -91,7 +91,7 @@ export function apply(ctx: Context) {
       switch (true)
       {
         case (/^\d+$/.test(rmNumTemp)): {
-          rmNum = Number(rmNum);
+          rmNum = Number(rmNumTemp);
           break;
         }
 
