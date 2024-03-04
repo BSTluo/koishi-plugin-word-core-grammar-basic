@@ -112,7 +112,7 @@ export function apply(ctx: Context) {
       // 我觉得需要个数据缓存，而不是刚刚完成就保存
 
       const now: number = number - Number(rmNum);
-      if (now < 0) { return inData.parPack.end(`物品 [${item}] 数量不足`); }
+      if (now < 0) { return inData.parPack.kill(`物品 [${item}] 数量不足`); }
       const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
       if (ok)
@@ -135,13 +135,14 @@ export function apply(ctx: Context) {
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
-      const number = await ctx.word.user.getItem(uid, saveCell, item);
-
+      let number = await ctx.word.user.getItem(uid, saveCell, item);
+      number = (number) ? number : 0
+      
       const inputNumber = inData.args[2];
       if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end(); }
 
       const relationship = inData.args[1];
-      if (relationship == '=' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
+      if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
       {
         // 判断符号符合预期
       } else
