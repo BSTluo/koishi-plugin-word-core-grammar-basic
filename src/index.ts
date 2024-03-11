@@ -102,7 +102,7 @@ export function apply(ctx: Context) {
         }
         case (/^\d+%$/.test(rmNumTemp)): {
           const matchData = rmNumTemp.match(/^(\d+)%$/);
-          rmNum = number * Number(matchData[1]);
+          rmNum = number * Number(matchData[1]) / 100;
           break;
         }
 
