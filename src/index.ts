@@ -126,6 +126,7 @@ export function apply(ctx: Context) {
 
     // 判断物品数量
     // 语法: (?:物品名称:关系:数量:信息?:用户id?)
+    // 物品名称现在支持数字
     // 谁可以为that，匹配问中第一个at的id
     // 不写可选元素时，目标为整个语句
     // 不写信息和谁的时候是表明为当前语句的判断
@@ -135,9 +136,16 @@ export function apply(ctx: Context) {
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
-      let number = await ctx.word.user.getItem(uid, saveCell, item);
-      number = (number) ? number : 0
-      
+      let number;
+      if (/^\d+$/.test(item))
+      {
+        number = Number(item);
+      } else
+      {
+        number = await ctx.word.user.getItem(uid, saveCell, item);
+      }
+      number = (number) ? number : 0;
+
       const inputNumber = inData.args[2];
       if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end(); }
 
@@ -266,11 +274,60 @@ export function apply(ctx: Context) {
     });
 
     // cd装置
-    ctx.word.statement.addStatement('^', async (inData, session) => {
+    // 语法：(cd:事件名称:cd时间:消息?)
+    // 若是信息省略则代表忽略整句话
+    ctx.word.statement.addStatement('cd', async (inData, session) => {
+      const uid = session.userId;
+      const userConfig = await ctx.word.user.getConfig(uid);
 
+      const eventName = inData.args[0];
+
+      const time = inData.args[1];
+      if (!/^\d+$/.test(time)) { return inData.parPack.end('cd时间输入错误'); }
+
+
+      if (!userConfig[eventName])
+      {
+        userConfig[eventName] = Number(time);
+        // 如果有消息项
+        if (inData.args.length > 2)
+        {
+          return inData.args[2];
+        } else
+        { // 如果无消息项，再去看看同句内有没有能触发的
+
+          return inData.parPack.next();
+        }
+      } else { return inData.parPack.next(); }
     });
 
     // 输入数
+    // 定义一个输入trigger：
+    if (!ctx.word.trigger.trigger['(数)'])
+    {
+      ctx.word.trigger.addTrigger('inputNumber', '(数)', '([\\d]+?)');
+    }
+
+    // 获取输入的数
+    // 语法：(数:第几个输入的数)
+    ctx.word.statement.addStatement('数', async (inData, session) => {
+      const inputNumber = inData.args[0];
+      console.log(inputNumber);
+      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end('获取输入数的输入参数不正确'); }
+
+      const data = inData.matchs.inputNumber[Number(inputNumber) - 1];
+      if (!data) { return inData.parPack.end('未获取到输入的数'); }
+
+      return data;
+    });
+
     // 四则
+    // 语法：(算:数1:+-*/:数2)
+    ctx.word.statement.addStatement('算', async(inData, session)=>{
+      const numArgs1 = inData.args[0]
+      const numArgs2 = inData.args[2]
+      const Operator = inData.args[1]
+    })
+    // 获取时间
   });
 }
