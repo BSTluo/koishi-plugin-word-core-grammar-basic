@@ -214,7 +214,9 @@ export function apply(ctx: Context) {
 
       const saveCell = inData.wordData.saveDB;
       const item = inData.args[0];
-      const number = await ctx.word.user.getItem(uid, saveCell, item);
+      let number = await ctx.word.user.getItem(uid, saveCell, item);
+
+      number = (number) ? number : 0;
 
       return String(number);
     });
@@ -234,13 +236,12 @@ export function apply(ctx: Context) {
 
       if (Number(inData.args[0]) > randomNumber)
       {
-
         return msg;
       } else
       {
         if (inData.args.length > 1)
         {
-          return '';
+          return inData.parPack.end('');
         } else
         {
           return inData.parPack.end('判定失败');
@@ -341,5 +342,6 @@ export function apply(ctx: Context) {
     // ${day.getFullYear()}.${day.getMonth()}.${day.getDate()} ${day.getHours()}:${day.getMinutes()}:${day.getMilliseconds()}
 
     // 鉴权(p:权限名:消息?)
+    // 清空一个人的数据(kill:目标)
   });
 }
