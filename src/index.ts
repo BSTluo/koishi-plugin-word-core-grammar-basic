@@ -136,7 +136,8 @@ export function apply(ctx: Context) {
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
-      let number;
+      let number: number;
+
       if (/^\d+$/.test(item))
       {
         number = Number(item);
@@ -144,6 +145,7 @@ export function apply(ctx: Context) {
       {
         number = await ctx.word.user.getItem(uid, saveCell, item);
       }
+
       number = (number) ? number : 0;
 
       const inputNumber = inData.args[2];
@@ -218,9 +220,9 @@ export function apply(ctx: Context) {
     });
 
     // 概率判断
-    // 语法：(%:概率(0~100):消息？)
+    // 语法：(%:概率(0~100):消息?)
     ctx.word.statement.addStatement('%', async (inData, session) => {
-      if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 0) { return inData.parPack.end('概率格式错误'); }
+      if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 100) { return inData.parPack.end('概率格式错误'); }
       const random = (minNumber: number, maxNumber: number): number => {
         return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
       };
@@ -230,7 +232,7 @@ export function apply(ctx: Context) {
       let msg = '';
       if (inData.args.length > 1) { msg = inData.args[1]; }
 
-      if (randomNumber > Number(inData.args[0]))
+      if (Number(inData.args[0]) > randomNumber)
       {
 
         return msg;
@@ -323,11 +325,21 @@ export function apply(ctx: Context) {
 
     // 四则
     // 语法：(算:数1:+-*/:数2)
-    ctx.word.statement.addStatement('算', async(inData, session)=>{
-      const numArgs1 = inData.args[0]
-      const numArgs2 = inData.args[2]
-      const Operator = inData.args[1]
-    })
-    // 获取时间
+    ctx.word.statement.addStatement('算', async (inData, session) => {
+      const numArgs1 = inData.args[0];
+      const numArgs2 = inData.args[2];
+      const Operator = inData.args[1];
+    });
+
+    // 随机数(~:a:b)生成a~b的随机数
+    // 获取机器人昵称(称)
+    // 禁止解析区域(/:信息?)
+    // 设置物品为数组(a+:物品值:目标?/that)
+    // 查询物品为数组的项(a#:物品:谁?:某一项?:到某一项随机?/all)
+
+    // 获取时间(time:显示类型?)【1.时间戳 2. 年.月.日 3. 时.分 4. 秒】
+    // ${day.getFullYear()}.${day.getMonth()}.${day.getDate()} ${day.getHours()}:${day.getMinutes()}:${day.getMilliseconds()}
+
+    // 鉴权(p:权限名:消息?)
   });
 }
