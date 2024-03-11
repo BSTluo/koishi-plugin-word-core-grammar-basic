@@ -166,7 +166,7 @@ export function apply(ctx: Context) {
         {
           if (inData.args[3] == '')
           {
-            return inData.parPack.next();
+            return '';
           } else { return inData.args[3]; }
         }
         else
@@ -181,7 +181,7 @@ export function apply(ctx: Context) {
           if (inData.args[3] == '')
           {
             return inData.parPack.next();
-          } else { return ''; }
+          } else { return ''; } // [bug] 内部不应该执行，但是执行且无法撤销
         } else
         {
           return inData.parPack.next();
