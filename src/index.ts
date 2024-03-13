@@ -29,7 +29,8 @@ export function apply(ctx: Context) {
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
-      const number = await ctx.word.user.getItem(uid, saveCell, item);
+      // const number = await ctx.word.user.getItem(uid, saveCell, item);
+      const number = await inData.internal.getItem(uid, saveCell, item);
 
       const addNumTemp = inData.args[1];
       let addNum = 0;
@@ -60,15 +61,16 @@ export function apply(ctx: Context) {
 
       const now: number = number + Number(addNum);
 
-      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
-
-      if (ok)
-      {
-        return String(addNum);
-      } else
-      {
-        throw `物品 [${item}] 添加失败`;
-      }
+      // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
+      inData.internal.saveItem(uid, saveCell, item, now);
+      return String(addNum);
+      // if (ok)
+      // {
+      //   return String(rmNum);
+      // } else
+      // {
+      //   return inData.parPack.kill(`物品 [${item}] 减少失败`);
+      // }
     });
 
     // 减少物品
@@ -82,7 +84,8 @@ export function apply(ctx: Context) {
       if (uid == 'that') { uid = inData.matchs.id[0]; }
 
       const item = inData.args[0];
-      const number = await ctx.word.user.getItem(uid, saveCell, item);
+      // const number = await ctx.word.user.getItem(uid, saveCell, item);
+      const number = await inData.internal.getItem(uid, saveCell, item);
 
       const rmNumTemp = inData.args[1];
       let rmNum = 0;
@@ -113,15 +116,19 @@ export function apply(ctx: Context) {
 
       const now: number = number - Number(rmNum);
       if (now < 0) { return inData.parPack.kill(`物品 [${item}] 数量不足`); }
-      const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
+      // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
-      if (ok)
-      {
-        return String(rmNum);
-      } else
-      {
-        return inData.parPack.kill(`物品 [${item}] 减少失败`);
-      }
+      inData.internal.saveItem(uid, saveCell, item, now);
+
+      return String(rmNum);
+
+      // if (ok)
+      // {
+      //   return String(rmNum);
+      // } else
+      // {
+      //   return inData.parPack.kill(`物品 [${item}] 减少失败`);
+      // }
     });
 
     // 判断物品数量
@@ -143,7 +150,7 @@ export function apply(ctx: Context) {
         number = Number(item);
       } else
       {
-        number = await ctx.word.user.getItem(uid, saveCell, item);
+        number = await inData.internal.getItem(uid, saveCell, item);
       }
 
       number = (number) ? number : 0;
@@ -214,7 +221,7 @@ export function apply(ctx: Context) {
 
       const saveCell = inData.wordData.saveDB;
       const item = inData.args[0];
-      let number = await ctx.word.user.getItem(uid, saveCell, item);
+      let number = await inData.internal.getItem(uid, saveCell, item);
 
       number = (number) ? number : 0;
 
@@ -241,7 +248,7 @@ export function apply(ctx: Context) {
       {
         if (inData.args.length > 1)
         {
-          return inData.parPack.end('');
+          return inData.parPack.kill('');
         } else
         {
           return inData.parPack.kill('判定失败');
