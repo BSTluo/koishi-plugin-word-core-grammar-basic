@@ -120,7 +120,7 @@ export function apply(ctx: Context) {
         return String(rmNum);
       } else
       {
-        return inData.parPack.end(`物品 [${item}] 减少失败`);
+        return inData.parPack.kill(`物品 [${item}] 减少失败`);
       }
     });
 
@@ -149,7 +149,7 @@ export function apply(ctx: Context) {
       number = (number) ? number : 0;
 
       const inputNumber = inData.args[2];
-      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end(); }
+      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(); }
 
       const relationship = inData.args[1];
       if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
@@ -157,7 +157,7 @@ export function apply(ctx: Context) {
         // 判断符号符合预期
       } else
       {
-        return inData.parPack.end();
+        return inData.parPack.kill();
       }
 
       if (eval(`${number}${relationship}${inputNumber}`))
@@ -194,7 +194,7 @@ export function apply(ctx: Context) {
     // 不写可选元素时，目标为整个语句
     // 单位是s
     ctx.word.statement.addStatement('&', async (inData, session) => {
-      if (!/^\d+$/.test(inData.args[0])) { return inData.parPack.end('时间格式错误'); }
+      if (!/^\d+$/.test(inData.args[0])) { return inData.parPack.kill('时间格式错误'); }
       await sleep(Number(inData.args[0]) * 10);
       if (inData.args.length > 1)
       {
@@ -224,7 +224,7 @@ export function apply(ctx: Context) {
     // 概率判断
     // 语法：(%:概率(0~100):消息?)
     ctx.word.statement.addStatement('%', async (inData, session) => {
-      if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 100) { return inData.parPack.end('概率格式错误'); }
+      if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 100) { return inData.parPack.kill('概率格式错误'); }
       const random = (minNumber: number, maxNumber: number): number => {
         return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
       };
@@ -244,7 +244,7 @@ export function apply(ctx: Context) {
           return inData.parPack.end('');
         } else
         {
-          return inData.parPack.end('判定失败');
+          return inData.parPack.kill('判定失败');
         }
       }
     });
@@ -286,7 +286,7 @@ export function apply(ctx: Context) {
       const eventName = inData.args[0];
 
       const time = inData.args[1];
-      if (!/^\d+$/.test(time)) { return inData.parPack.end('cd时间输入错误'); }
+      if (!/^\d+$/.test(time)) { return inData.parPack.kill('cd时间输入错误'); }
 
 
       if (!userConfig[eventName])
@@ -316,10 +316,10 @@ export function apply(ctx: Context) {
     ctx.word.statement.addStatement('数', async (inData, session) => {
       const inputNumber = inData.args[0];
       console.log(inputNumber);
-      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.end('获取输入数的输入参数不正确'); }
+      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
       const data = inData.matchs.inputNumber[Number(inputNumber) - 1];
-      if (!data) { return inData.parPack.end('未获取到输入的数'); }
+      if (!data) { return inData.parPack.kill('未获取到输入的数'); }
 
       return data;
     });
