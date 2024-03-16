@@ -322,7 +322,7 @@ export function apply(ctx: Context) {
     // 语法：(数:第几个输入的数)
     ctx.word.statement.addStatement('数', async (inData, session) => {
       const inputNumber = inData.args[0];
-      console.log(inputNumber);
+      // console.log(inputNumber);
       if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
       const data = inData.matchs.inputNumber[Number(inputNumber) - 1];
