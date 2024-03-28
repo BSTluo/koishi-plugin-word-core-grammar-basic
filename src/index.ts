@@ -318,12 +318,12 @@ export function apply(ctx: Context) {
     ctx.word.trigger.addTrigger('inputNumber', '(数)', '([\\d]+?)');
   }
 
-    // 获取输入的数
-    // 语法：(数:第几个输入的数)
-    ctx.word.statement.addStatement('数', async (inData, session) => {
-      const inputNumber = inData.args[0];
-      // console.log(inputNumber);
-      if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+  // 获取输入的数
+  // 语法：(数:第几个输入的数)
+  ctx.word.statement.addStatement('数', async (inData, session) => {
+    const inputNumber = inData.args[0];
+    // console.log(inputNumber);
+    if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
     const data = inData.matchs.inputNumber[Number(inputNumber) - 1];
     if (!data) { return inData.parPack.kill('未获取到输入的数'); }
@@ -337,6 +337,12 @@ export function apply(ctx: Context) {
     const numArgs1 = inData.args[0];
     const numArgs2 = inData.args[2];
     const Operator = inData.args[1];
+
+    if (!/^\d+$/.test(numArgs1)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+    if (!/^\d+$/.test(numArgs2)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+    if (!/[+-/*]/.test(Operator)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+
+    return eval(`${numArgs1}${Operator}${numArgs2}`)
   });
 
   // 随机数(~:a:b)生成a~b的随机数
