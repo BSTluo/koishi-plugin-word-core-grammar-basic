@@ -346,6 +346,20 @@ export function apply(ctx: Context) {
   });
 
   // 随机数(~:a:b)生成a~b的随机数
+  ctx.word.statement.addStatement('算', async (inData, session) => {
+    const first = inData.args[0]
+    const second = inData.args[1]
+
+    if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+    if (!/^\d+$/.test(second)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
+
+    const random = (minNumber: number, maxNumber: number): number => {
+      return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+    };
+
+    return String(random(Number(first), Number(second)))
+  })
+
   // 获取机器人昵称(称)
   // 禁止解析区域(/:信息?)
   // 设置物品为数组(a+:物品值:目标?/that)
