@@ -116,6 +116,7 @@ export function apply(ctx: Context) {
     // 我觉得需要个数据缓存，而不是刚刚完成就保存
 
     const now: number = number - Number(rmNum);
+
     if (now < 0) { return inData.parPack.kill(`物品 [${item}] 数量不足`); }
     // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
@@ -145,7 +146,7 @@ export function apply(ctx: Context) {
 
     const item = inData.args[0];
     let number: number;
-    
+
     if (/^\d+$/.test(item))
     {
       number = Number(item);
@@ -157,7 +158,7 @@ export function apply(ctx: Context) {
     number = (number) ? number : 0;
 
     const inputNumber = inData.args[2];
-    if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(); }
+    if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
 
     const relationship = inData.args[1];
     if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
@@ -165,7 +166,7 @@ export function apply(ctx: Context) {
       // 判断符号符合预期
     } else
     {
-      return inData.parPack.kill();
+      return inData.parPack.kill(`数量 [${relationship}] 不符合预期`);
     }
 
     if (eval(`${number}${relationship}${inputNumber}`))
