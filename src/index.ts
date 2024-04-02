@@ -145,7 +145,7 @@ export function apply(ctx: Context) {
 
     const item = inData.args[0];
     let number: number;
-
+    
     if (/^\d+$/.test(item))
     {
       number = Number(item);
@@ -280,7 +280,7 @@ export function apply(ctx: Context) {
   });
 
   // 隐式返回
-  ctx.word.statement.addStatement('!', async () => {
+  ctx.word.statement.addStatement('!', async (inData, session) => {
     return '';
   });
 
@@ -365,11 +365,11 @@ export function apply(ctx: Context) {
     if (!/^\d+$/.test(numArgs2)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     if (!/[+-/*]/.test(Operator)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
-    return eval(`${numArgs1}${Operator}${numArgs2}`);
+    return String(eval(`${numArgs1}${Operator}${numArgs2}`));
   });
 
   // 随机数(~:a:b)生成a~b的随机数
-  ctx.word.statement.addStatement('算', async (inData, session) => {
+  ctx.word.statement.addStatement('~', async (inData, session) => {
     const first = inData.args[0];
     const second = inData.args[1];
 
