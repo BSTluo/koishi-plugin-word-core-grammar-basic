@@ -345,7 +345,7 @@ export function apply(ctx: Context)
 
       } else
       {
-        return inData.parPack.next();
+        return inData.parPack.kill();
       }
     }
   });
