@@ -27,6 +27,7 @@ export function apply(ctx: Context) {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
+    // console.log('+', inData.args);
 
     const item = inData.args[0];
     // const number = await ctx.word.user.getItem(uid, saveCell, item);
@@ -34,11 +35,11 @@ export function apply(ctx: Context) {
 
     const addNumTemp = inData.args[1];
     let addNum = 0;
-    if (!/^\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
+    if (!/^\d+$/.test(addNumTemp) && !/^\d+\.\d+$/.test(addNumTemp)&& !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
 
     switch (true)
     {
-      case (/^\d+$/.test(addNumTemp)): {
+      case (/^\d+$/.test(addNumTemp) || /^\d+\.\d+$/.test(addNumTemp)): {
         addNum = Number(addNumTemp);
         break;
       }
@@ -83,6 +84,7 @@ export function apply(ctx: Context) {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
+    // console.log('-', inData.args);
 
     const item = inData.args[0];
     // const number = await ctx.word.user.getItem(uid, saveCell, item);
@@ -90,11 +92,11 @@ export function apply(ctx: Context) {
 
     const rmNumTemp = inData.args[1];
     let rmNum = 0;
-    if (!/^\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
+    if (!/^\d+$/.test(rmNumTemp) && !/^\d+\.\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
 
     switch (true)
     {
-      case (/^\d+$/.test(rmNumTemp)): {
+      case (/^\d+$/.test(rmNumTemp) || /^\d+\.\d+$/.test(rmNumTemp)): {
         rmNum = Number(rmNumTemp);
         break;
       }
@@ -134,7 +136,7 @@ export function apply(ctx: Context) {
   });
 
   // 判断物品数量
-  // 语法: (?:物品名称:关系:数量:信息?:用户id?)
+  // 语法: (?:物品名称/数字:关系:数量:信息?:用户id?)
   // 物品名称现在支持数字
   // 谁可以为that，匹配问中第一个at的id
   // 不写可选元素时，目标为整个语句
@@ -147,7 +149,7 @@ export function apply(ctx: Context) {
     const item = inData.args[0];
     let number: number;
 
-    if (/^\d+$/.test(item))
+    if (/^\d+$/.test(item) || /^\d+\.\d+$/.test(item))
     {
       number = Number(item);
     } else
@@ -158,7 +160,7 @@ export function apply(ctx: Context) {
     number = (number) ? number : 0;
 
     const inputNumber = inData.args[2];
-    if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
+    if (!/^\d+$/.test(inputNumber) || !/^\d+\.\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
 
     const relationship = inData.args[1];
     if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
@@ -442,10 +444,6 @@ export function apply(ctx: Context) {
   // 设置物品为数组(a+:物品值:目标?/that)
   // 查询物品为数组的项(a#:物品:谁?:某一项?:到某一项随机?/all)
 
-  // 获取时间(time:显示类型?)【1.时间戳 2. 年.月.日 3. 时.分 4. 秒】
-  // ${day.getFullYear()}.${day.getMonth()}.${day.getDate()} ${day.getHours()}:${day.getMinutes()}:${day.getMilliseconds()}
-
   // 鉴权(p:权限名:消息?)
   // 清空一个人的数据(kill:目标)
-
 }
