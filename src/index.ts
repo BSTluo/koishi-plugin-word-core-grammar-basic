@@ -160,7 +160,7 @@ export function apply(ctx: Context) {
     number = (number) ? number : 0;
 
     const inputNumber = inData.args[2];
-    if (!/^\d+$/.test(inputNumber) || !/^\d+\.\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
+    if (!/^\d+$/.test(inputNumber) && !/^\d+\.\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
 
     const relationship = inData.args[1];
     if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
