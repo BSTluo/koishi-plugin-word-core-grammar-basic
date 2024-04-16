@@ -1,4 +1,4 @@
-import { Context, Schema, sleep } from 'koishi';
+import { Context, Schema, clone, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
@@ -35,7 +35,7 @@ export function apply(ctx: Context) {
 
     const addNumTemp = inData.args[1];
     let addNum = 0;
-    if (!/^\d+$/.test(addNumTemp) && !/^\d+\.\d+$/.test(addNumTemp)&& !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
+    if (!/^\d+$/.test(addNumTemp) && !/^\d+\.\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
 
     switch (true)
     {
@@ -437,6 +437,22 @@ export function apply(ctx: Context) {
     {
       return String(time);
     }
+  });
+
+  // 触发某个触发词
+  // 语法：(调:某触发词)
+  ctx.word.statement.addStatement('调', async (inData, session) => {
+    const whichStart = inData.args[0];
+
+    if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
+
+    const newSession = clone(session);
+    newSession.content = whichStart;
+    const msg = await ctx.word.driver.start(newSession);
+
+    if (!msg) { return ''; }
+
+    return msg;
   });
 
   // 获取机器人昵称(称)
