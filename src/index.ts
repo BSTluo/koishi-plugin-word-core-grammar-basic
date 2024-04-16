@@ -35,11 +35,11 @@ export function apply(ctx: Context) {
 
     const addNumTemp = inData.args[1];
     let addNum = 0;
-    if (!/^\d+$/.test(addNumTemp) && !/^\d+\.\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
+    if (!/^\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
 
     switch (true)
     {
-      case (/^\d+$/.test(addNumTemp) || /^\d+\.\d+$/.test(addNumTemp)): {
+      case (/^\d+$/.test(addNumTemp)): {
         addNum = Number(addNumTemp);
         break;
       }
@@ -63,9 +63,9 @@ export function apply(ctx: Context) {
     const now: number = number + Number(addNum);
 
     // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
-    inData.internal.saveItem(uid, saveCell, item, now);
+    inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
 
-    return String(addNum);
+    return String(Math.floor(addNum));
     // if (ok)
     // {
     //   return String(rmNum);
@@ -92,11 +92,11 @@ export function apply(ctx: Context) {
 
     const rmNumTemp = inData.args[1];
     let rmNum = 0;
-    if (!/^\d+$/.test(rmNumTemp) && !/^\d+\.\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
+    if (!/^\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
 
     switch (true)
     {
-      case (/^\d+$/.test(rmNumTemp) || /^\d+\.\d+$/.test(rmNumTemp)): {
+      case (/^\d+$/.test(rmNumTemp)): {
         rmNum = Number(rmNumTemp);
         break;
       }
@@ -122,9 +122,9 @@ export function apply(ctx: Context) {
     if (now < 0) { return inData.parPack.kill(`物品 [${item}] 数量不足`); }
     // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
-    inData.internal.saveItem(uid, saveCell, item, now);
+    inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
 
-    return String(rmNum);
+    return String(Math.floor(rmNum));
 
     // if (ok)
     // {
@@ -149,7 +149,7 @@ export function apply(ctx: Context) {
     const item = inData.args[0];
     let number: number;
 
-    if (/^\d+$/.test(item) || /^\d+\.\d+$/.test(item))
+    if (/^\d+$/.test(item))
     {
       number = Number(item);
     } else
@@ -160,7 +160,7 @@ export function apply(ctx: Context) {
     number = (number) ? number : 0;
 
     const inputNumber = inData.args[2];
-    if (!/^\d+$/.test(inputNumber) && !/^\d+\.\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
+    if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
 
     const relationship = inData.args[1];
     if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
