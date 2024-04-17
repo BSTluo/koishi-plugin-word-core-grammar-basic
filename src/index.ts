@@ -221,6 +221,7 @@ export function apply(ctx: Context) {
   // 谁可以为that，匹配问中第一个at的id
   ctx.word.statement.addStatement('#', async (inData, session) => {
     let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+
     if (uid == 'that') { uid = inData.matchs.id[0]; }
 
     const saveCell = inData.wordData.saveDB;
@@ -443,10 +444,11 @@ export function apply(ctx: Context) {
   // 语法：(调:某触发词)
   ctx.word.statement.addStatement('调', async (inData, session) => {
     const whichStart = inData.args[0];
-
+    // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
 
-    const newSession = clone(session);
+    // const newSession = clone(session);
+    const newSession = session;
     newSession.content = whichStart;
     const msg = await ctx.word.driver.start(newSession);
 
