@@ -1,4 +1,4 @@
-import { Context, Schema, clone, sleep } from 'koishi';
+import { Context, Schema, Session, clone, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
@@ -447,11 +447,13 @@ export function apply(ctx: Context) {
     // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
 
-    // const newSession = clone(session);
-    const newSession = session;
-    newSession.content = whichStart;
-    const msg = await ctx.word.driver.start(newSession);
+    const test = Object.create(Object.getPrototypeOf(session)) as Session;
+    Object.assign(test, session);
 
+    test.content = whichStart;
+
+    const msg = await ctx.word.driver.start(test);
+    // console.log(msg)
     if (!msg) { return ''; }
 
     return msg;
