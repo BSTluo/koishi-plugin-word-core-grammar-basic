@@ -14,9 +14,7 @@ const randomNumber = (minNumber: number, maxNumber: number): number => {
 };
 
 export function apply(ctx: Context) {
-  // write your plugin here
-
-  // 谁可以为that
+  // 语法为判断结构时，addStatement为三参，返回值为true或者false
 
   // 增加物品
   // 语法: (+:物品名称:数量:用户id?)
@@ -369,7 +367,7 @@ export function apply(ctx: Context) {
     if (!/^\d+$/.test(numArgs2)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     if (!/[+-/*]/.test(Operator)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
-    return String(eval(`${numArgs1}${Operator}${numArgs2}`));
+    return String(Math.floor(eval(`${numArgs1}${Operator}${numArgs2}`)));
   });
 
   // 随机数(~:a:b)生成a~b的随机数
