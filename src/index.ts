@@ -62,9 +62,8 @@ export function apply(ctx: Context)
     }
 
     const now: number = number + Number(addNum);
-
     // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
-    inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
+    await inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
 
     return String(Math.floor(addNum));
     // if (ok)
@@ -124,7 +123,7 @@ export function apply(ctx: Context)
     if (now < 0) { return inData.parPack.kill(`物品 [${item}] 数量不足`); }
     // const ok = await ctx.word.user.updateItem(uid, saveCell, item, now);
 
-    inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
+    await inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
 
     return String(Math.floor(rmNum));
 
@@ -226,6 +225,7 @@ export function apply(ctx: Context)
   ctx.word.statement.addStatement('#', async (inData, session) =>
   {
     let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    // console.log('#', inData.args);
 
     if (uid == 'that') { uid = inData.matchs.id[0]; }
 
