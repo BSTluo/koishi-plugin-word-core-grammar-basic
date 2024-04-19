@@ -9,11 +9,13 @@ export const Config: Schema<Config> = Schema.object({});
 
 export const inject = ['word'];
 
-const randomNumber = (minNumber: number, maxNumber: number): number => {
+const randomNumber = (minNumber: number, maxNumber: number): number =>
+{
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 };
 
-export function apply(ctx: Context) {
+export function apply(ctx: Context)
+{
   // 语法为判断结构时，addStatement为三参，返回值为true或者false
 
   // 增加物品
@@ -21,7 +23,8 @@ export function apply(ctx: Context) {
   // 语法: (+:物品名称:数量~数量:用户id?)
   // 语法: (+:物品名称:数量%:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('+', async (inData, session) => {
+  ctx.word.statement.addStatement('+', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -78,7 +81,8 @@ export function apply(ctx: Context) {
   // 语法: (-:物品名称:数量~数量:用户id?)
   // 语法: (-:物品名称:数量%:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('-', async (inData, session) => {
+  ctx.word.statement.addStatement('-', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -139,7 +143,8 @@ export function apply(ctx: Context) {
   // 谁可以为that，匹配问中第一个at的id
   // 不写可选元素时，目标为整个语句
   // 不写信息和谁的时候是表明为当前语句的判断
-  ctx.word.statement.addStatement('?', async (inData, session) => {
+  ctx.word.statement.addStatement('?', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 5) ? inData.args[4] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -196,13 +201,14 @@ export function apply(ctx: Context) {
         return inData.parPack.next();
       }
     }
-  });
+  }, [0, 1, 1, 1]);
 
   // 延迟发送信息
   // 语法(&:时间:消息？)
   // 不写可选元素时，目标为整个语句
   // 单位是s
-  ctx.word.statement.addStatement('&', async (inData, session) => {
+  ctx.word.statement.addStatement('&', async (inData, session) =>
+  {
     if (!/^\d+$/.test(inData.args[0])) { return inData.parPack.kill('时间格式错误'); }
     await sleep(Number(inData.args[0]) * 10);
     if (inData.args.length > 1)
@@ -217,7 +223,8 @@ export function apply(ctx: Context) {
   // 返回背包数量
   // 语法：(#:物品名称:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('#', async (inData, session) => {
+  ctx.word.statement.addStatement('#', async (inData, session) =>
+  {
     let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
 
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -233,9 +240,11 @@ export function apply(ctx: Context) {
 
   // 概率判断
   // 语法：(%:概率(0~100):消息?)
-  ctx.word.statement.addStatement('%', async (inData, session) => {
+  ctx.word.statement.addStatement('%', async (inData, session) =>
+  {
     if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 100) { return inData.parPack.kill('概率格式错误'); }
-    const random = (minNumber: number, maxNumber: number): number => {
+    const random = (minNumber: number, maxNumber: number): number =>
+    {
       return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
     };
 
@@ -257,39 +266,45 @@ export function apply(ctx: Context) {
         return inData.parPack.kill('判定失败');
       }
     }
-  });
+  }, [0, 1]);
 
   // 我的name
-  ctx.word.statement.addStatement('@this', async (inData, session) => {
+  ctx.word.statement.addStatement('@this', async (inData, session) =>
+  {
     return session.username;
   });
 
   // 我的id
-  ctx.word.statement.addStatement('#this', async (inData, session) => {
+  ctx.word.statement.addStatement('#this', async (inData, session) =>
+  {
     return session.userId;
   });
 
   // 对方的name
-  ctx.word.statement.addStatement('@that', async (inData, session) => {
+  ctx.word.statement.addStatement('@that', async (inData, session) =>
+  {
     if (!inData.matchs.hasOwnProperty('name')) { return; }
     return inData.matchs.name[0];
   });
 
   // 对方的id
-  ctx.word.statement.addStatement('#that', async (inData, session) => {
+  ctx.word.statement.addStatement('#that', async (inData, session) =>
+  {
     if (!inData.matchs.hasOwnProperty('id')) { return; }
     return inData.matchs.id[0];
   });
 
   // 隐式返回
-  ctx.word.statement.addStatement('!', async (inData, session) => {
+  ctx.word.statement.addStatement('!', async (inData, session) =>
+  {
     return '';
   });
 
   // cd装置
   // 语法：(cd:事件名称:cd时间:消息?)
   // 若是信息省略则代表忽略整句话
-  ctx.word.statement.addStatement('cd', async (inData, session) => {
+  ctx.word.statement.addStatement('cd', async (inData, session) =>
+  {
     const uid = session.userId;
 
     const eventName = inData.args[0];
@@ -334,18 +349,19 @@ export function apply(ctx: Context) {
         return inData.parPack.kill();
       }
     }
-  });
+  }, [0, 1, 1]);
 
   // 输入数
   // 定义一个输入trigger：
   if (!ctx.word.trigger.trigger['(数)'])
   {
-    ctx.word.trigger.addTrigger('inputNumber', '(数)', '([\\d]+)?');
+    ctx.word.trigger.addTrigger('inputNumber', '(数)', '(\\d+)+?');
   }
 
   // 获取输入的数
   // 语法：(数:第几个输入的数)
-  ctx.word.statement.addStatement('数', async (inData, session) => {
+  ctx.word.statement.addStatement('数', async (inData, session) =>
+  {
     const inputNumber = inData.args[0];
     // console.log(inputNumber);
     if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
@@ -358,7 +374,8 @@ export function apply(ctx: Context) {
 
   // 四则
   // 语法：(算:数1:+-*/:数2)
-  ctx.word.statement.addStatement('算', async (inData, session) => {
+  ctx.word.statement.addStatement('算', async (inData, session) =>
+  {
     const numArgs1 = inData.args[0];
     const numArgs2 = inData.args[2];
     const Operator = inData.args[1];
@@ -371,14 +388,16 @@ export function apply(ctx: Context) {
   });
 
   // 随机数(~:a:b)生成a~b的随机数
-  ctx.word.statement.addStatement('~', async (inData, session) => {
+  ctx.word.statement.addStatement('~', async (inData, session) =>
+  {
     const first = inData.args[0];
     const second = inData.args[1];
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     if (!/^\d+$/.test(second)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
-    const random = (minNumber: number, maxNumber: number): number => {
+    const random = (minNumber: number, maxNumber: number): number =>
+    {
       return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
     };
 
@@ -386,7 +405,8 @@ export function apply(ctx: Context) {
   });
 
   // 获取时间(time:显示类型?)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒】
-  ctx.word.statement.addStatement('time', async (inData, session) => {
+  ctx.word.statement.addStatement('time', async (inData, session) =>
+  {
     const first = inData.args[0];
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
@@ -440,7 +460,8 @@ export function apply(ctx: Context) {
 
   // 触发某个触发词
   // 语法：(调:某触发词)
-  ctx.word.statement.addStatement('调', async (inData, session) => {
+  ctx.word.statement.addStatement('调', async (inData, session) =>
+  {
     const whichStart = inData.args[0];
     // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
