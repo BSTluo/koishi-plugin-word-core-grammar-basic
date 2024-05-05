@@ -414,14 +414,18 @@ export function apply(ctx: Context) {
 
     // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
+    
+    if (!session.bot) { return '当前不支持调用语法'; }
+    if (!session.send) { return '当前不支持调用语法'; }
+    if (!session.event) { return '当前不支持调用语法'; }
 
-    const test = session.bot.session(session.event)
+    const test = session?.bot.session(session.event) as Session;
 
     test.content = whichStart;
 
-    const msg = await ctx.word.driver.start(test, async msg => {
+    await ctx.word.driver.start(test, async msg => {
       if (!msg) { return ''; }
-      test.send(msg);
+      test?.send(msg);
     });
     // console.log(msg)
     return ''
@@ -435,3 +439,5 @@ export function apply(ctx: Context) {
   // 鉴权(p:权限名:消息?)
   // 清空一个人的数据(kill:目标)
 }
+
+// 新增一个in接口，发送当前的文本，并且，截断前置文本
