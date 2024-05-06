@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-word-core-grammar-basic",
   "description": "词库引擎，基础语法扩展",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -16,7 +16,7 @@
   ],
   "peerDependencies": {
     "koishi": "^4.17.4",
-    "koishi-plugin-word-core": "^1.0.0-alpha.6"
+    "koishi-plugin-word-core": "^1.0.0-alpha.7"
   },
   "koishi": {
     "service": {
@@ -26,7 +26,7 @@
     }
   },
   "devDependencies": {
-    "koishi-plugin-word-core": "1.0.0-alpha.6"
+    "koishi-plugin-word-core": "1.0.0-alpha.7"
   },
   "repository": {
     "type": "git",

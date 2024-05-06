@@ -467,9 +467,9 @@ export function apply(ctx: Context)
     // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
 
-    if (!session.bot) { return '当前不支持调用语法'; }
-    if (!session.send) { return '当前不支持调用语法'; }
-    if (!session.event) { return '当前不支持调用语法'; }
+    if (!session.hasOwnProperty('bot')) { return '当前不支持调用语法'; }
+    if (!session.hasOwnProperty('send')) { return '当前不支持调用语法'; }
+    if (!session.hasOwnProperty('event')) { return '当前不支持调用语法'; }
 
     const test = session?.bot.session(session.event) as Session;
 
@@ -483,6 +483,20 @@ export function apply(ctx: Context)
 
     // console.log(msg)
     return getReturnMsg;
+  });
+
+  // 等待输入
+  // 语法：(wi:参数名称?)
+  ctx.word.statement.addStatement('wi', async (inData, session) =>
+  {
+    if (session.hasOwnProperty('prompt')) { return '当前不支持获取输入语法'; }
+    if (session.hasOwnProperty('send')) { return '当前不支持获取输入语法'; }
+
+    session.send(`请输入${(inData.args[0])? inData.args[0] + "的值":''}:`)
+
+    const a = await session?.prompt();
+    if (!a) { return ''; }
+    return a;
   });
 
   // 获取机器人昵称(称)
