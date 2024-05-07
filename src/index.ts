@@ -467,9 +467,9 @@ export function apply(ctx: Context)
     // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
 
-    if (!session.hasOwnProperty('bot')) { return '当前不支持调用语法'; }
-    if (!session.hasOwnProperty('send')) { return '当前不支持调用语法'; }
-    if (!session.hasOwnProperty('event')) { return '当前不支持调用语法'; }
+    if (!session.bot) { ctx.logger('调用语法中session缺少bot属性'); return '【当前触发方式不支持调用语法】'; }
+    if (!session.send) { ctx.logger('调用语法中session缺少send属性'); return '【当前触发方式不支持调用语法】'; }
+    if (!session.event) { ctx.logger('调用语法中session缺少event属性'); return '【当前触发方式不支持调用语法】'; }
 
     const test = session?.bot.session(session.event) as Session;
 
@@ -492,7 +492,7 @@ export function apply(ctx: Context)
     if (session.hasOwnProperty('prompt')) { return '当前不支持获取输入语法'; }
     if (session.hasOwnProperty('send')) { return '当前不支持获取输入语法'; }
 
-    session.send(`请输入${(inData.args[0])? inData.args[0] + "的值":''}:`)
+    session.send(`请输入${(inData.args[0]) ? inData.args[0] + "的值" : ''}:`);
 
     const a = await session?.prompt();
     if (!a) { return ''; }
