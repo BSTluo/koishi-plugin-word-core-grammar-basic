@@ -485,6 +485,32 @@ export function apply(ctx: Context)
     return getReturnMsg;
   });
 
+  ctx.word.statement.addStatement('异调', async (inData, session) =>
+  {
+    const whichStart = inData.args[0];
+
+    // console.log(session.userId);
+    if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
+
+    if (!session.bot) { ctx.logger('调用语法中session缺少bot属性'); return '【当前触发方式不支持调用语法】'; }
+    if (!session.send) { ctx.logger('调用语法中session缺少send属性'); return '【当前触发方式不支持调用语法】'; }
+    if (!session.event) { ctx.logger('调用语法中session缺少event属性'); return '【当前触发方式不支持调用语法】'; }
+
+    const test = session?.bot.session(session.event) as Session;
+
+    test.content = whichStart;
+    
+    await ctx.word.driver.start(test, async msg =>
+    {
+      if (!msg) { return ''; }
+      test.send(msg);
+    });
+
+    // console.log(msg)
+    return '';
+  });
+
+
   // 等待输入
   // 语法：(wi:参数名称?)
   ctx.word.statement.addStatement('wi', async (inData, session) =>
