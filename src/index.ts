@@ -525,6 +525,7 @@ export function apply(ctx: Context)
     return a;
   });
 
+  // 排行榜
   // 获取机器人昵称(称)
   // 禁止解析区域(/:信息?)
   // 设置物品为数组(a+:物品值:目标?/that)
