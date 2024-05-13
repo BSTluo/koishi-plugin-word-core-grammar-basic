@@ -3,9 +3,14 @@ import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
 
-export interface Config { }
+export interface Config
+{
+  Leaderboard: number;
+}
 
-export const Config: Schema<Config> = Schema.object({});
+export const Config: Schema<Config> = Schema.object({
+  Leaderboard: Schema.number().default(10).description('排行榜最大显示数量')
+});
 
 export const inject = ['word'];
 
@@ -14,7 +19,7 @@ const randomNumber = (minNumber: number, maxNumber: number): number =>
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 };
 
-export function apply(ctx: Context)
+export function apply(ctx: Context, config: Config)
 {
   // 语法为判断结构时，addStatement为三参，返回值为true或者false
 
@@ -499,7 +504,7 @@ export function apply(ctx: Context)
     const test = session?.bot.session(session.event) as Session;
 
     test.content = whichStart;
-    
+
     await ctx.word.driver.start(test, async msg =>
     {
       if (!msg) { return ''; }
@@ -525,11 +530,71 @@ export function apply(ctx: Context)
     return a;
   });
 
+  // 排行榜
+  // 语法：(排行榜:物品)
+  ctx.word.statement.addStatement('排行榜', async (inData, session) =>
+  {
+    const itemName = inData.args[0];
+    const saveCell = inData.wordData.saveDB;
+
+    const a = await ctx.word.tools.getDB('wordUserPackData');
+    const userList = a.idList;
+    const dataList = a.dataList;
+
+    const dataTempList = [];
+    const userTempList = [];
+
+    dataList.forEach((item, index) =>
+    {
+      if (!item[saveCell]) { return; }
+      if (!item[saveCell][itemName]) { return; }
+
+      dataTempList.push(item[saveCell][itemName]);
+      userTempList.push(userList[index]);
+    });
+
+    const outDataList = [].concat(dataTempList).sort((a, b) => { return b - a; });
+    const outUserList = [];
+    let outMsg = '';
+
+    outDataList.forEach((v, nowIndex) =>
+    {
+      const index = dataTempList.indexOf(v);
+      outUserList.push(userTempList[index]);
+
+      if (nowIndex < config.Leaderboard)
+      {
+        outMsg += `${nowIndex + 1}. <at id="${userTempList[index]}"/>  ${v}\n`;
+      }
+
+      dataTempList.splice(index, 1);
+      userTempList.splice(index, 1);
+    });
+
+    return outMsg;
+  });
+
+  // 鉴权
+  // 语法：(p:权限名:消息?)
+  ctx.word.statement.addStatement('p', async (inData, session) =>
+  {
+    const permission = inData.args[0];
+    let uid = session.userId;
+
+    const have = await ctx.word.permission.isHave(uid, permission);
+    const msg = inData.args[1] ? inData.args[1] : '';
+    if (msg == '')
+    {
+      if (have) { return ''; } else { return inData.parPack.next(); }
+    } else
+    {
+      if (have) { return msg; } else { return ''; }
+    }
+  });
+
   // 获取机器人昵称(称)
   // 禁止解析区域(/:信息?)
   // 设置物品为数组(a+:物品值:目标?/that)
   // 查询物品为数组的项(a#:物品:谁?:某一项?:到某一项随机?/all)
-
-  // 鉴权(p:权限名:消息?)
   // 清空一个人的数据(kill:目标)
 }
