@@ -409,7 +409,7 @@ export function apply(ctx: Context, config: Config)
     return String(random(Number(first), Number(second)));
   });
 
-  // 获取时间(time:显示类型?)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒】
+  // 获取时间(time:显示类型?)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
   ctx.word.statement.addStatement('time', async (inData, session) =>
   {
     const first = inData.args[0];
@@ -453,6 +453,10 @@ export function apply(ctx: Context, config: Config)
         break;
       }
 
+      case "8": {
+        time = Date.now();
+        break;
+      }
       default:
         break;
     }
