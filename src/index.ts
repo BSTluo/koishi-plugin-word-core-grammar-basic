@@ -669,7 +669,7 @@ export function apply(ctx: Context, config: Config)
 
   // 点视频
   // 语法：(视频:url直链)
-  ctx.word.statement.addStatement('歌曲', async (inData, session) =>
+  ctx.word.statement.addStatement('视频', async (inData, session) =>
   {
     const url = inData.args[0];
     if (!url) { return inData.parPack.kill('无歌曲链接参数'); }
