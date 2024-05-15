@@ -1,4 +1,4 @@
-import { Context, Schema, Session, clone, sleep } from 'koishi';
+import { Context, Schema, Session, clone, h, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
@@ -524,8 +524,8 @@ export function apply(ctx: Context, config: Config)
   // 语法：(wi:参数名称?)
   ctx.word.statement.addStatement('wi', async (inData, session) =>
   {
-    if (session.hasOwnProperty('prompt')) { return '当前不支持获取输入语法'; }
-    if (session.hasOwnProperty('send')) { return '当前不支持获取输入语法'; }
+    if (!session.hasOwnProperty('prompt')) { return '当前不支持获取输入语法'; }
+    if (!session.hasOwnProperty('send')) { return '当前不支持获取输入语法'; }
 
     session.send(`请输入${(inData.args[0]) ? inData.args[0] + "的值" : ''}:`);
 
@@ -658,10 +658,67 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
-  // 歌曲
-  // 视频
+  // 点歌
+  // 语法：(歌曲:url直链)
+  ctx.word.statement.addStatement('歌曲', async (inData, session) =>
+  {
+    const url = inData.args[0];
+    if (!url) { return inData.parPack.kill('无歌曲链接参数'); }
+    return `<audio src="${url}" url="${url}"/>`;
+  });
+
+  // 点视频
+  // 语法：(视频:url直链)
+  ctx.word.statement.addStatement('歌曲', async (inData, session) =>
+  {
+    const url = inData.args[0];
+    if (!url) { return inData.parPack.kill('无歌曲链接参数'); }
+    return `<video src="${url}" url="${url}"/>`;
+  });
+
   // 禁言
-  // 踢人
+  // 语法：(禁言:时常s:用户id?:理由?)
+  // 为0表示解除禁言
+  ctx.word.statement.addStatement('禁言', async (inData, session) =>
+  {
+    if (!session.hasOwnProperty('guildId')) { return '当前不支持获取输入语法'; }
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    let long = inData.args[0];
+
+    if (!/^\d+$/.test(long)) { return inData.parPack.kill('获取禁言时常的输入参数不正确'); }
+
+    let reason = inData.args[2];
+
+    if (reason)
+    {
+      session.bot.muteGuildMember(session.guildId, uid, long, reason);
+    } else
+    {
+      session.bot.muteGuildMember(session.guildId, uid, long);
+    }
+  });
+
+  // 踢
+  // 语法：(踢:用户id?:是否永久踢0/1)
+  ctx.word.statement.addStatement('踢', async (inData, session) =>
+  {
+    if (!session.hasOwnProperty('guildId')) { return '当前不支持获取输入语法'; }
+
+    let uid = (inData.args.length >= 0) ? inData.args[0] : session.userId;
+    let long = inData.args[1] ? inData.args[1] : 0;
+
+    if (!/^\d+$/.test(long)) { return inData.parPack.kill('获取禁言时常的输入参数不正确'); }
+
+    if (long == 0)
+    {
+      session.bot.kickGuildMember(session.guildId, uid, false);
+    } else
+    {
+      session.bot.kickGuildMember(session.guildId, uid, true);
+    }
+  });
+
   // 获取机器人昵称(称)
   // 设置物品为数组(a+:物品值:目标?/that)
   // 查询物品为数组的项(a#:物品:谁?:某一项?:到某一项随机?/all)
