@@ -430,7 +430,8 @@ export function apply(ctx: Context, config: Config)
       }
 
       case "3": {
-        time = day.getDay() + 1;
+        time = day.getDay();
+        if (time == 0) { time = 7; }
         break;
       }
 
