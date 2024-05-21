@@ -299,6 +299,24 @@ export function apply(ctx: Context, config: Config)
     return inData.matchs.id[0];
   });
 
+  // 创建个at
+  ctx.word.statement.addStatement('@', async (inData, session) =>
+  {
+    const at = inData.args[0];
+    if (!at) { return '创建at时出错：未填写昵称'; }
+
+    return `<at name="${at}"/>`;
+  });
+
+  // 创建个at id？
+  ctx.word.statement.addStatement('#', async (inData, session) =>
+  {
+    const at = inData.args[0];
+    if (!at) { return '创建at时出错：未填写标识'; }
+
+    return `<at id="${at}"/>`;
+  });
+
   // 隐式返回
   ctx.word.statement.addStatement('!', async (inData, session) =>
   {
