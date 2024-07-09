@@ -487,8 +487,8 @@ export function apply(ctx: Context, config: Config) {
   // 等待输入
   // 语法：(wi:参数名称?)
   ctx.word.statement.addStatement('wi', async (inData, session) => {
-    if (!session.hasOwnProperty('prompt')) { return '当前不支持获取输入语法'; }
-    if (!session.hasOwnProperty('send')) { return '当前不支持获取输入语法'; }
+    if (!session.prompt) { ctx.logger('wi语法中session缺少prompt属性'); return '当前不支持获取输入语法'; }
+    if (!session.send) {ctx.logger('wi语法中session缺少send属性');  return '当前不支持获取输入语法'; }
 
     session.send(`请输入${(inData.args[0]) ? inData.args[0] + "的值" : ''}:`);
 
