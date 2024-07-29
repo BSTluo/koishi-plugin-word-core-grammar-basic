@@ -379,7 +379,7 @@ export function apply(ctx: Context, config: Config) {
     return String(random(Number(first), Number(second)));
   });
 
-  // 获取时间(time:显示类型?)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
+  // 获取时间(time:显示类型)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
   ctx.word.statement.addStatement('time', async (inData, session) => {
     const first = inData.args[0];
 
@@ -460,6 +460,7 @@ export function apply(ctx: Context, config: Config) {
     return getReturnMsg;
   });
 
+  // 异步调用
   ctx.word.statement.addStatement('异调', async (inData, session) => {
     const whichStart = inData.args[0];
 
@@ -497,46 +498,6 @@ export function apply(ctx: Context, config: Config) {
     return a;
   });
 
-  // 排行榜
-  // 语法：(排行榜:物品)
-  ctx.word.statement.addStatement('排行榜', async (inData, session) => {
-    const itemName = inData.args[0];
-    const saveCell = inData.wordData.saveDB;
-
-    const a = await ctx.word.tools.getDB('wordUserPackData');
-    const userList = a.idList;
-    const dataList = a.dataList;
-
-    const dataTempList = [];
-    const userTempList = [];
-
-    dataList.forEach((item, index) => {
-      if (!item[saveCell]) { return; }
-      if (!item[saveCell][itemName]) { return; }
-
-      dataTempList.push(item[saveCell][itemName]);
-      userTempList.push(userList[index]);
-    });
-
-    const outDataList = [].concat(dataTempList).sort((a, b) => { return b - a; });
-    const outUserList = [];
-    let outMsg = '';
-
-    outDataList.forEach((v, nowIndex) => {
-      const index = dataTempList.indexOf(v);
-      outUserList.push(userTempList[index]);
-
-      if (nowIndex < config.Leaderboard) {
-        outMsg += `${nowIndex + 1}. <at id="${userTempList[index]}"/>  ${v}\n`;
-      }
-
-      dataTempList.splice(index, 1);
-      userTempList.splice(index, 1);
-    });
-
-    return outMsg;
-  });
-
   // 鉴权
   // 语法：(p:权限名:消息?)
   ctx.word.statement.addStatement('p', async (inData, session) => {
@@ -590,21 +551,6 @@ export function apply(ctx: Context, config: Config) {
     });
 
     return outMsg;
-  });
-
-  // 鉴权
-  // 语法：(p:权限名:消息?)
-  ctx.word.statement.addStatement('p', async (inData, session) => {
-    const permission = inData.args[0];
-    let uid = session.userId;
-
-    const have = await ctx.word.permission.isHave(uid, permission);
-    const msg = inData.args[1] ? inData.args[1] : '';
-    if (msg == '') {
-      if (have) { return ''; } else { return inData.parPack.next(); }
-    } else {
-      if (have) { return msg; } else { return ''; }
-    }
   });
 
   // 点歌
