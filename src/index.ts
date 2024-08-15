@@ -693,7 +693,7 @@ export function apply(ctx: Context, config: Config)
         headers: head,
         data: body
       };
-      
+
       if (!config.headers) { delete config.headers; }
       if (!config.data) { delete config.data; }
 
@@ -727,6 +727,17 @@ export function apply(ctx: Context, config: Config)
     return json;
   };
 
+  const dataSplit = (data: any, needSplit: string) =>
+  {
+    const splitList = needSplit.split('.');
+    let returnMsg = data;
+    for (let i of splitList)
+    {
+      returnMsg = returnMsg[i];
+    }
+    return returnMsg;
+  };
+
   // 创建http get请求
   // (get:url:headJSON:bodyJSON:getData....)
   ctx.word.statement.addStatement('get', async (inData, session) =>
@@ -741,6 +752,15 @@ export function apply(ctx: Context, config: Config)
     if (body != '') { body = getJson(bodyTemp); }
 
     const data = await httpRequest(url, 'get', head, body);
+    const needDataList = inData.args.slice(3);
+    let outMsg = '';
+    needDataList.forEach(e =>
+    {
+      outMsg += dataSplit(structuredClone(data), e);
+    });
+
+    // console.log(outMsg)
+    return outMsg;
   });
 
   // 创建https get请求
@@ -757,6 +777,15 @@ export function apply(ctx: Context, config: Config)
     if (body != '') { body = getJson(bodyTemp); }
 
     const data = await httpRequest(url, 'get', head, body);
+    const needDataList = inData.args.slice(3);
+    let outMsg = '';
+    needDataList.forEach(e =>
+    {
+      outMsg += dataSplit(structuredClone(data), e);
+    });
+
+    // console.log(outMsg)
+    return outMsg;
   });
 
   // 创建https post请求
@@ -773,6 +802,15 @@ export function apply(ctx: Context, config: Config)
     if (body != '') { body = getJson(bodyTemp); }
 
     const data = await httpRequest(url, 'post', head, body);
+    const needDataList = inData.args.slice(3);
+    let outMsg = '';
+    needDataList.forEach(e =>
+    {
+      outMsg += dataSplit(structuredClone(data), e);
+    });
+
+    // console.log(outMsg)
+    return outMsg;
   });
 
   // 创建https post请求
@@ -789,6 +827,15 @@ export function apply(ctx: Context, config: Config)
     if (body != '') { body = getJson(bodyTemp); }
 
     const data = await httpRequest(url, 'post', head, body);
+    const needDataList = inData.args.slice(3);
+    let outMsg = '';
+    needDataList.forEach(e =>
+    {
+      outMsg += dataSplit(structuredClone(data), e);
+    });
+
+    // console.log(outMsg)
+    return outMsg;
   });
 
   // 获取机器人昵称(称)
