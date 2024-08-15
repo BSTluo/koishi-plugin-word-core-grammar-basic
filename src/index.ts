@@ -1,9 +1,11 @@
-import { Context, Schema, Session, clone, h, sleep } from 'koishi';
+import { METHODS } from 'http';
+import { Context, HTTP, Schema, Session, clone, h, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 
 export const name = 'word-core-grammar-basic';
 
-export interface Config {
+export interface Config
+{
   Leaderboard: number;
 }
 
@@ -13,11 +15,13 @@ export const Config: Schema<Config> = Schema.object({
 
 export const inject = ['word'];
 
-const randomNumber = (minNumber: number, maxNumber: number): number => {
+const randomNumber = (minNumber: number, maxNumber: number): number =>
+{
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 };
 
-export function apply(ctx: Context, config: Config) {
+export function apply(ctx: Context, config: Config)
+{
   // 语法为判断结构时，addStatement为三参，返回值为true或者false
 
   // 增加物品
@@ -25,7 +29,8 @@ export function apply(ctx: Context, config: Config) {
   // 语法: (+:物品名称:数量~数量:用户id?)
   // 语法: (+:物品名称:数量%:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('+', async (inData, session) => {
+  ctx.word.statement.addStatement('+', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -39,7 +44,8 @@ export function apply(ctx: Context, config: Config) {
     let addNum = 0;
     if (!/^\d+$/.test(addNumTemp) && !/^\d+\~\d+$/.test(addNumTemp) && !/^\d+%$/.test(addNumTemp)) { throw `物品 [${item}] 添加的数量 [${addNum}] 不为数字或标识`; }
 
-    switch (true) {
+    switch (true)
+    {
       case (/^\d+$/.test(addNumTemp)): {
         addNum = Number(addNumTemp);
         break;
@@ -80,7 +86,8 @@ export function apply(ctx: Context, config: Config) {
   // 语法: (-:物品名称:数量~数量:用户id?)
   // 语法: (-:物品名称:数量%:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('-', async (inData, session) => {
+  ctx.word.statement.addStatement('-', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -94,7 +101,8 @@ export function apply(ctx: Context, config: Config) {
     let rmNum = 0;
     if (!/^\d+$/.test(rmNumTemp) && !/^\d+\~\d+$/.test(rmNumTemp) && !/^\d+%$/.test(rmNumTemp)) { throw `物品 [${item}] 添加的数量 [${rmNum}] 不为数字或标识`; }
 
-    switch (true) {
+    switch (true)
+    {
       case (/^\d+$/.test(rmNumTemp)): {
         rmNum = Number(rmNumTemp);
         break;
@@ -140,7 +148,8 @@ export function apply(ctx: Context, config: Config) {
   // 谁可以为that，匹配问中第一个at的id
   // 不写可选元素时，目标为整个语句
   // 不写信息和谁的时候是表明为当前语句的判断
-  ctx.word.statement.addStatement('?', async (inData, session) => {
+  ctx.word.statement.addStatement('?', async (inData, session) =>
+  {
     const saveCell = inData.wordData.saveDB;
     let uid = (inData.args.length >= 5) ? inData.args[4] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
@@ -148,9 +157,11 @@ export function apply(ctx: Context, config: Config) {
     const item = inData.args[0];
     let number: number;
 
-    if (/^\d+$/.test(item)) {
+    if (/^\d+$/.test(item))
+    {
       number = Number(item);
-    } else {
+    } else
+    {
       number = await inData.internal.getItem(uid, saveCell, item);
     }
 
@@ -160,28 +171,38 @@ export function apply(ctx: Context, config: Config) {
     if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill(`数量 [${inputNumber}] 不为数字`); }
 
     const relationship = inData.args[1];
-    if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=') {
+    if (relationship == '==' || relationship == '>' || relationship == '<' || relationship == '!=' || relationship == '>=' || relationship == '<=')
+    {
       // 判断符号符合预期
-    } else {
+    } else
+    {
       return inData.parPack.kill(`数量 [${relationship}] 不符合预期`);
     }
 
-    if (eval(`${number}${relationship}${inputNumber}`)) {
-      if (inData.args.length >= 4) {
-        if (inData.args[3] == '') {
+    if (eval(`${number}${relationship}${inputNumber}`))
+    {
+      if (inData.args.length >= 4)
+      {
+        if (inData.args[3] == '')
+        {
           return '';
         } else { return inData.args[3]; }
       }
-      else {
+      else
+      {
         return '';
       }
     }
-    else {
-      if (inData.args.length >= 4) {
-        if (inData.args[3] == '') {
+    else
+    {
+      if (inData.args.length >= 4)
+      {
+        if (inData.args[3] == '')
+        {
           return inData.parPack.next();
         } else { return ''; } // [bug] 内部不应该执行，但是执行且无法撤销
-      } else {
+      } else
+      {
         return inData.parPack.next();
       }
     }
@@ -191,12 +212,15 @@ export function apply(ctx: Context, config: Config) {
   // 语法(&:时间:消息？)
   // 不写可选元素时，目标为整个语句
   // 单位是s
-  ctx.word.statement.addStatement('&', async (inData, session) => {
+  ctx.word.statement.addStatement('&', async (inData, session) =>
+  {
     if (!/^\d+$/.test(inData.args[0])) { return inData.parPack.kill('时间格式错误'); }
     await sleep(Number(inData.args[0]) * 1000);
-    if (inData.args.length > 1) {
+    if (inData.args.length > 1)
+    {
       return inData.args[1];
-    } else {
+    } else
+    {
       return '';
     }
   });
@@ -204,7 +228,8 @@ export function apply(ctx: Context, config: Config) {
   // 返回背包数量
   // 语法：(#:物品名称:用户id?)
   // 谁可以为that，匹配问中第一个at的id
-  ctx.word.statement.addStatement('#', async (inData, session) => {
+  ctx.word.statement.addStatement('#', async (inData, session) =>
+  {
     let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
     // console.log('#', inData.args);
 
@@ -221,9 +246,11 @@ export function apply(ctx: Context, config: Config) {
 
   // 概率判断
   // 语法：(%:概率(0~100):消息?)
-  ctx.word.statement.addStatement('%', async (inData, session) => {
+  ctx.word.statement.addStatement('%', async (inData, session) =>
+  {
     if (!/^\d+$/.test(inData.args[0]) || Number(inData.args[0]) < 0 || Number(inData.args[0]) > 100) { return inData.parPack.kill('概率格式错误'); }
-    const random = (minNumber: number, maxNumber: number): number => {
+    const random = (minNumber: number, maxNumber: number): number =>
+    {
       return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
     };
 
@@ -232,67 +259,82 @@ export function apply(ctx: Context, config: Config) {
     let msg = '';
     if (inData.args.length > 1) { msg = inData.args[1]; }
 
-    if (Number(inData.args[0]) > randomNumber) {
+    if (Number(inData.args[0]) > randomNumber)
+    {
       return msg;
-    } else {
-      if (inData.args.length > 1) {
+    } else
+    {
+      if (inData.args.length > 1)
+      {
         return inData.parPack.kill('');
-      } else {
+      } else
+      {
         return inData.parPack.kill('判定失败');
       }
     }
   }, [0, 1]);
 
   // 我的name
-  ctx.word.statement.addStatement('@this', async (inData, session) => {
+  ctx.word.statement.addStatement('@this', async (inData, session) =>
+  {
     return session.username;
   });
 
   // 我的id
-  ctx.word.statement.addStatement('#this', async (inData, session) => {
+  ctx.word.statement.addStatement('#this', async (inData, session) =>
+  {
     return session.userId;
   });
 
   // 对方的name
-  ctx.word.statement.addStatement('@that', async (inData, session) => {
+  ctx.word.statement.addStatement('@that', async (inData, session) =>
+  {
     if (!inData.matchs.hasOwnProperty('name')) { return; }
     return inData.matchs.name[0];
   });
 
   // 对方的id
-  ctx.word.statement.addStatement('#that', async (inData, session) => {
+  ctx.word.statement.addStatement('#that', async (inData, session) =>
+  {
     if (!inData.matchs.hasOwnProperty('id')) { return; }
     return inData.matchs.id[0];
   });
 
   // 创建个at
   // 语法：(@:id/name:值)
-  ctx.word.statement.addStatement('@', async (inData, session) => {
+  ctx.word.statement.addStatement('@', async (inData, session) =>
+  {
     const type = inData.args[0];
     const at = inData.args[1];
-    if (!at) {
+    if (!at)
+    {
       return '创建at时出错：未填写昵称或id';
     }
-    if (type == 'id') {
+    if (type == 'id')
+    {
       return `<at id="${at}"/>`;
     }
-    else if (type == 'name') {
+    else if (type == 'name')
+    {
       return `<at name="${at}"/>`;
     }
-    else {
+    else
+    {
       return '创建at时出错：未填写类型或类型出错';
     }
   });
 
   // 隐式返回
-  ctx.word.statement.addStatement('!', async (inData, session) => {
+  ctx.word.statement.addStatement('!', async (inData, session) =>
+  {
     return '';
   });
 
   // cd装置
   // 语法：(cd:事件名称:cd时间:消息?)
   // 若是信息省略则代表忽略整句话
-  ctx.word.statement.addStatement('cd', async (inData, session) => {
+  ctx.word.statement.addStatement('cd', async (inData, session) =>
+  {
     const uid = session.userId;
 
     const eventName = inData.args[0];
@@ -302,30 +344,38 @@ export function apply(ctx: Context, config: Config) {
 
     let userEventConfig = await inData.internal.getUserConfig(uid, eventName) as number;
 
-    if (!userEventConfig) {
+    if (!userEventConfig)
+    {
       userEventConfig = Number(time) * 1000 + Date.now();
       inData.internal.saveUserConfig(uid, eventName, userEventConfig);
 
       // 如果有消息项
-      if (inData.args.length > 2) {
+      if (inData.args.length > 2)
+      {
         return inData.args[2];
-      } else { // 如果无消息项，再去看看同句内有没有能触发的
+      } else
+      { // 如果无消息项，再去看看同句内有没有能触发的
 
         return '';
       }
-    } else {
-      if (Date.now() >= userEventConfig) {
+    } else
+    {
+      if (Date.now() >= userEventConfig)
+      {
         userEventConfig = Number(time) * 1000 + Date.now();
         inData.internal.saveUserConfig(uid, eventName, userEventConfig);
 
-        if (inData.args.length > 2) {
+        if (inData.args.length > 2)
+        {
           return inData.args[2];
-        } else { // 如果无消息项，再去看看同句内有没有能触发的
+        } else
+        { // 如果无消息项，再去看看同句内有没有能触发的
 
           return '';
         }
 
-      } else {
+      } else
+      {
         return inData.parPack.kill();
       }
     }
@@ -333,13 +383,15 @@ export function apply(ctx: Context, config: Config) {
 
   // 输入数
   // 定义一个输入trigger：
-  if (!ctx.word.trigger.trigger['(数)']) {
+  if (!ctx.word.trigger.trigger['(数)'])
+  {
     ctx.word.trigger.addTrigger('inputNumber', '(数)', '(\\d+)+?');
   }
 
   // 获取输入的数
   // 语法：(数:第几个输入的数)
-  ctx.word.statement.addStatement('数', async (inData, session) => {
+  ctx.word.statement.addStatement('数', async (inData, session) =>
+  {
     const inputNumber = inData.args[0];
     // console.log(inputNumber);
     if (!/^\d+$/.test(inputNumber)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
@@ -352,7 +404,8 @@ export function apply(ctx: Context, config: Config) {
 
   // 四则
   // 语法：(算:数1:+-*/:数2)
-  ctx.word.statement.addStatement('算', async (inData, session) => {
+  ctx.word.statement.addStatement('算', async (inData, session) =>
+  {
     const numArgs1 = inData.args[0];
     const numArgs2 = inData.args[2];
     const Operator = inData.args[1];
@@ -365,14 +418,16 @@ export function apply(ctx: Context, config: Config) {
   });
 
   // 随机数(~:a:b)生成a~b的随机数
-  ctx.word.statement.addStatement('~', async (inData, session) => {
+  ctx.word.statement.addStatement('~', async (inData, session) =>
+  {
     const first = inData.args[0];
     const second = inData.args[1];
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     if (!/^\d+$/.test(second)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
-    const random = (minNumber: number, maxNumber: number): number => {
+    const random = (minNumber: number, maxNumber: number): number =>
+    {
       return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
     };
 
@@ -380,13 +435,15 @@ export function apply(ctx: Context, config: Config) {
   });
 
   // 获取时间(time:显示类型)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
-  ctx.word.statement.addStatement('time', async (inData, session) => {
+  ctx.word.statement.addStatement('time', async (inData, session) =>
+  {
     const first = inData.args[0];
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     const day = new Date();
     let time;
-    switch (first) {
+    switch (first)
+    {
       case "1": {
         time = day.getFullYear();
         break;
@@ -430,14 +487,16 @@ export function apply(ctx: Context, config: Config) {
         break;
     }
 
-    if (time) {
+    if (time)
+    {
       return String(time);
     }
   });
 
   // 触发某个触发词
   // 语法：(调:某触发词)
-  ctx.word.statement.addStatement('调', async (inData, session) => {
+  ctx.word.statement.addStatement('调', async (inData, session) =>
+  {
     const whichStart = inData.args[0];
 
     // console.log(session.userId);
@@ -451,7 +510,8 @@ export function apply(ctx: Context, config: Config) {
 
     test.content = whichStart;
     let getReturnMsg = '';
-    await ctx.word.driver.start(test, async msg => {
+    await ctx.word.driver.start(test, async msg =>
+    {
       if (!msg) { return ''; }
       getReturnMsg = msg;
     });
@@ -461,7 +521,8 @@ export function apply(ctx: Context, config: Config) {
   });
 
   // 异步调用
-  ctx.word.statement.addStatement('异调', async (inData, session) => {
+  ctx.word.statement.addStatement('异调', async (inData, session) =>
+  {
     const whichStart = inData.args[0];
 
     // console.log(session.userId);
@@ -475,7 +536,8 @@ export function apply(ctx: Context, config: Config) {
 
     test.content = whichStart;
 
-    await ctx.word.driver.start(test, async msg => {
+    await ctx.word.driver.start(test, async msg =>
+    {
       if (!msg) { return ''; }
       test.send(msg);
     });
@@ -487,9 +549,10 @@ export function apply(ctx: Context, config: Config) {
 
   // 等待输入
   // 语法：(wi:参数名称?)
-  ctx.word.statement.addStatement('wi', async (inData, session) => {
+  ctx.word.statement.addStatement('wi', async (inData, session) =>
+  {
     if (!session.prompt) { ctx.logger('wi语法中session缺少prompt属性'); return '当前不支持获取输入语法'; }
-    if (!session.send) {ctx.logger('wi语法中session缺少send属性');  return '当前不支持获取输入语法'; }
+    if (!session.send) { ctx.logger('wi语法中session缺少send属性'); return '当前不支持获取输入语法'; }
 
     session.send(`请输入${(inData.args[0]) ? inData.args[0] + "的值" : ''}:`);
 
@@ -500,22 +563,26 @@ export function apply(ctx: Context, config: Config) {
 
   // 鉴权
   // 语法：(p:权限名:消息?)
-  ctx.word.statement.addStatement('p', async (inData, session) => {
+  ctx.word.statement.addStatement('p', async (inData, session) =>
+  {
     const permission = inData.args[0];
     let uid = session.userId;
 
     const have = await ctx.word.permission.isHave(uid, permission);
     const msg = inData.args[1] ? inData.args[1] : '';
-    if (msg == '') {
+    if (msg == '')
+    {
       if (have) { return ''; } else { return inData.parPack.next(); }
-    } else {
+    } else
+    {
       if (have) { return msg; } else { return ''; }
     }
   });
 
   // 排行榜
   // 语法：(排行榜:物品)
-  ctx.word.statement.addStatement('排行榜', async (inData, session) => {
+  ctx.word.statement.addStatement('排行榜', async (inData, session) =>
+  {
     const itemName = inData.args[0];
     const saveCell = inData.wordData.saveDB;
 
@@ -526,7 +593,8 @@ export function apply(ctx: Context, config: Config) {
     const dataTempList = [];
     const userTempList = [];
 
-    dataList.forEach((item, index) => {
+    dataList.forEach((item, index) =>
+    {
       if (!item[saveCell]) { return; }
       if (!item[saveCell][itemName]) { return; }
 
@@ -538,11 +606,13 @@ export function apply(ctx: Context, config: Config) {
     const outUserList = [];
     let outMsg = '';
 
-    outDataList.forEach((v, nowIndex) => {
+    outDataList.forEach((v, nowIndex) =>
+    {
       const index = dataTempList.indexOf(v);
       outUserList.push(userTempList[index]);
 
-      if (nowIndex < config.Leaderboard) {
+      if (nowIndex < config.Leaderboard)
+      {
         outMsg += `${nowIndex + 1}. <at id="${userTempList[index]}"/>  ${v}\n`;
       }
 
@@ -555,7 +625,8 @@ export function apply(ctx: Context, config: Config) {
 
   // 点歌
   // 语法：(歌曲:url直链)
-  ctx.word.statement.addStatement('歌曲', async (inData, session) => {
+  ctx.word.statement.addStatement('歌曲', async (inData, session) =>
+  {
     const url = inData.args[0];
     if (!url) { return inData.parPack.kill('无歌曲链接参数'); }
     return `<audio src="${url}" url="${url}"/>`;
@@ -563,7 +634,8 @@ export function apply(ctx: Context, config: Config) {
 
   // 点视频
   // 语法：(视频:url直链)
-  ctx.word.statement.addStatement('视频', async (inData, session) => {
+  ctx.word.statement.addStatement('视频', async (inData, session) =>
+  {
     const url = inData.args[0];
     if (!url) { return inData.parPack.kill('无歌曲链接参数'); }
     return `<video src="${url}" url="${url}"/>`;
@@ -572,7 +644,8 @@ export function apply(ctx: Context, config: Config) {
   // 禁言
   // 语法：(禁言:时常s:用户id?:理由?)
   // 为0表示解除禁言
-  ctx.word.statement.addStatement('禁言', async (inData, session) => {
+  ctx.word.statement.addStatement('禁言', async (inData, session) =>
+  {
     if (!session.hasOwnProperty('guildId')) { return '当前不支持获取输入语法'; }
 
     let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
@@ -582,16 +655,19 @@ export function apply(ctx: Context, config: Config) {
 
     let reason = inData.args[2];
 
-    if (reason) {
+    if (reason)
+    {
       session.bot.muteGuildMember(session.guildId, uid, long, reason);
-    } else {
+    } else
+    {
       session.bot.muteGuildMember(session.guildId, uid, long);
     }
   });
 
   // 踢
   // 语法：(踢:用户id?:是否永久踢0/1)
-  ctx.word.statement.addStatement('踢', async (inData, session) => {
+  ctx.word.statement.addStatement('踢', async (inData, session) =>
+  {
     if (!session.hasOwnProperty('guildId')) { return '当前不支持获取输入语法'; }
 
     let uid = (inData.args.length >= 0) ? inData.args[0] : session.userId;
@@ -599,11 +675,120 @@ export function apply(ctx: Context, config: Config) {
 
     if (!/^\d+$/.test(long)) { return inData.parPack.kill('获取禁言时常的输入参数不正确'); }
 
-    if (long == 0) {
+    if (long == 0)
+    {
       session.bot.kickGuildMember(session.guildId, uid, false);
-    } else {
+    } else
+    {
       session.bot.kickGuildMember(session.guildId, uid, true);
     }
+  });
+
+  const httpRequest = async (url: string, method: 'post' | 'get', head: any, body: any) =>
+  {
+    if (method == 'post')
+    {
+      const config = {
+        method: method,
+        headers: head,
+        data: body
+      };
+      
+      if (!config.headers) { delete config.headers; }
+      if (!config.data) { delete config.data; }
+
+      const data = await ctx.http('post', url, config);
+      return data;
+    }
+    if (method == 'get')
+    {
+      const reqUrl = url + new URLSearchParams(body);
+
+      const data = head ? await ctx.http('get', url, {
+        headers: head
+      }) : await ctx.http('url');
+
+      return data;
+    }
+  };
+
+  const getJson = (originStr: string) =>
+  {
+    const temp = originStr.split('&');
+    const json = {};
+    temp.forEach(a =>
+    {
+      const list = a.split('=');
+      const key = list[0];
+      const value = list[1];
+
+      json[key] = value;
+    });
+    return json;
+  };
+
+  // 创建http get请求
+  // (get:url:headJSON:bodyJSON:getData....)
+  ctx.word.statement.addStatement('get', async (inData, session) =>
+  {
+    const url = `http://${inData.args[0]}`;
+    const headTemp = inData.args[1];
+    const bodyTemp = inData.args[2];
+    let head = null;
+    if (headTemp != '') { head = getJson(headTemp); }
+
+    let body = null;
+    if (body != '') { body = getJson(bodyTemp); }
+
+    const data = await httpRequest(url, 'get', head, body);
+  });
+
+  // 创建https get请求
+  // (gets:url:headJSON:bodyJSON:getData....)
+  ctx.word.statement.addStatement('gets', async (inData, session) =>
+  {
+    const url = `https://${inData.args[0]}`;
+    const headTemp = inData.args[1];
+    const bodyTemp = inData.args[2];
+    let head = null;
+    if (headTemp != '') { head = getJson(headTemp); }
+
+    let body = null;
+    if (body != '') { body = getJson(bodyTemp); }
+
+    const data = await httpRequest(url, 'get', head, body);
+  });
+
+  // 创建https post请求
+  // (posts:url:headJSON:bodyJSON:getData....)
+  ctx.word.statement.addStatement('posts', async (inData, session) =>
+  {
+    const url = `https://${inData.args[0]}`;
+    const headTemp = inData.args[1];
+    const bodyTemp = inData.args[2];
+    let head = null;
+    if (headTemp != '') { head = getJson(headTemp); }
+
+    let body = null;
+    if (body != '') { body = getJson(bodyTemp); }
+
+    const data = await httpRequest(url, 'post', head, body);
+  });
+
+  // 创建https post请求
+  // (posts:url:headJSON:bodyJSON:getData....)
+  ctx.word.statement.addStatement('post', async (inData, session) =>
+  {
+    const url = `http://${inData.args[0]}`;
+    const headTemp = inData.args[1];
+    const bodyTemp = inData.args[2];
+    let head = null;
+    if (headTemp != '') { head = getJson(headTemp); }
+
+    let body = null;
+    if (body != '') { body = getJson(bodyTemp); }
+
+    const data = await httpRequest(url, 'post', head, body);
   });
 
   // 获取机器人昵称(称)
