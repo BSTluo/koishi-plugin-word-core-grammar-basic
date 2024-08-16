@@ -763,7 +763,7 @@ export function apply(ctx: Context, config: Config)
     let outMsg = '';
     needDataList.forEach(e =>
     {
-      outMsg += dataSplit(structuredClone(data), e);
+      outMsg += String(dataSplit(structuredClone(data), e));
     });
 
     // console.log(outMsg)
@@ -814,7 +814,7 @@ export function apply(ctx: Context, config: Config)
     let outMsg = '';
     needDataList.forEach(e =>
     {
-      outMsg += dataSplit(structuredClone(data), e);
+      outMsg += String(dataSplit(structuredClone(data), e));
     });
 
     // console.log(outMsg)
@@ -839,7 +839,7 @@ export function apply(ctx: Context, config: Config)
     let outMsg = '';
     needDataList.forEach(e =>
     {
-      outMsg += dataSplit(structuredClone(data), e);
+      outMsg += String(dataSplit(structuredClone(data), e));
     });
 
     // console.log(outMsg)
