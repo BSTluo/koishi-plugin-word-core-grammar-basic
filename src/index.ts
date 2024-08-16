@@ -702,11 +702,11 @@ export function apply(ctx: Context, config: Config)
     }
     if (method == 'get')
     {
-      const reqUrl = url + new URLSearchParams(body);
+      const reqUrl = `${url}?${new URLSearchParams(body)}`;
 
-      const data = head ? await ctx.http('get', url, {
+      const data = head ? await ctx.http('get', reqUrl, {
         headers: head
-      }) : await ctx.http('url');
+      }) : await ctx.http(reqUrl);
 
       return data;
     }
@@ -733,7 +733,13 @@ export function apply(ctx: Context, config: Config)
     let returnMsg = data;
     for (let i of splitList)
     {
-      returnMsg = returnMsg[i];
+      if (returnMsg[i])
+      {
+        returnMsg = returnMsg[i];
+      } else
+      {
+        return needSplit;
+      }
     }
     return returnMsg;
   };
@@ -752,6 +758,7 @@ export function apply(ctx: Context, config: Config)
     if (body != '') { body = getJson(bodyTemp); }
 
     const data = await httpRequest(url, 'get', head, body);
+
     const needDataList = inData.args.slice(3);
     let outMsg = '';
     needDataList.forEach(e =>
@@ -775,16 +782,17 @@ export function apply(ctx: Context, config: Config)
 
     let body = null;
     if (body != '') { body = getJson(bodyTemp); }
-
+    // console.log(body);
+    // console.log('aaaa?');
     const data = await httpRequest(url, 'get', head, body);
+    // console.log('bbbb?');
     const needDataList = inData.args.slice(3);
     let outMsg = '';
     needDataList.forEach(e =>
     {
-      outMsg += dataSplit(structuredClone(data), e);
+      outMsg += String(dataSplit(structuredClone(data), e));
     });
 
-    // console.log(outMsg)
     return outMsg;
   });
 
