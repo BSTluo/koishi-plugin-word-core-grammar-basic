@@ -266,7 +266,7 @@ export function apply(ctx: Context, config: Config)
     {
       if (inData.args.length > 1)
       {
-        return inData.parPack.kill('');
+        return '';
       } else
       {
         return inData.parPack.kill('判定失败');
