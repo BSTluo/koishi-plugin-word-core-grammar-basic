@@ -846,6 +846,56 @@ export function apply(ctx: Context, config: Config)
     return outMsg;
   });
 
+  interface weightObj
+  {
+    value: string;
+    weight: number;
+  }
+
+  // 多重概率判断
+  // (%%:10:这是10%的概率:20:这是20%的概率)
+  ctx.word.statement.addStatement('%%', async (inData, session) =>
+  {
+    const args = inData.args;
+
+    if (args.length % 2 == 1) { return '参数数量为奇数'; }
+
+
+    const obj:weightObj[] = [];
+    for (let i = 0; i < args.length; i += 2)
+    {
+      if (!/^\d+$/.test(args[i])) { return `${i + 1}个参数不为整数`; }
+
+      obj.push({
+        value: args[i + 1],
+        weight: Number(args[i])
+      });
+    }
+
+    // 函数来根据权重随机选择一个元素
+    function weightedRandom(items: weightObj[])
+    {
+      // 计算总权重
+      const totalWeight = items.reduce((sum: number, item: { value: string, weight: number; }) => sum + item.weight, 0);
+
+      // 生成一个介于 0 和 totalWeight 之间的随机数
+      const randomNum = Math.random() * totalWeight;
+
+      let weightSum = 0;
+      // 遍历数组，找到随机数所在的权重区间
+      for (const item of items)
+      {
+        weightSum += item.weight;
+        if (randomNum < weightSum)
+        {
+          return item.value;
+        }
+      }
+    }
+
+    return weightedRandom(obj);
+  });
+
   // 获取机器人昵称(称)
   // 设置物品为数组(a+:物品值:目标?/that)
   // 查询物品为数组的项(a#:物品:谁?:某一项?:到某一项随机?/all)
