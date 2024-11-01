@@ -386,6 +386,7 @@ export function apply(ctx: Context, config: Config)
   if (!ctx.word.trigger.trigger['(数)'])
   {
     ctx.word.trigger.addTrigger('inputNumber', '(数)', '(\\d+)+?');
+    ctx.word.cache.cacheRefresh()
   }
 
   // 获取输入的数
