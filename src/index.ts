@@ -7,10 +7,12 @@ export const name = 'word-core-grammar-basic';
 export interface Config
 {
   Leaderboard: number;
+  httpRequest: boolean;
 }
 
 export const Config: Schema<Config> = Schema.object({
-  Leaderboard: Schema.number().default(10).description('排行榜最大显示数量')
+  Leaderboard: Schema.number().default(10).description('排行榜最大显示数量'),
+  httpRequest: Schema.boolean().default(true).description('是否启用http请求')
 });
 
 export const inject = ['word'];
@@ -386,7 +388,7 @@ export function apply(ctx: Context, config: Config)
   if (!ctx.word.trigger.trigger['(数)'])
   {
     ctx.word.trigger.addTrigger('inputNumber', '(数)', '(\\d+)+?');
-    ctx.word.cache.cacheRefresh()
+    ctx.word.cache.cacheRefresh();
   }
 
   // 获取输入的数
@@ -749,6 +751,7 @@ export function apply(ctx: Context, config: Config)
   // (get:url:headJSON:bodyJSON:getData....)
   ctx.word.statement.addStatement('get', async (inData, session) =>
   {
+    if (!config.httpRequest) { return; }
     const url = `http://${inData.args[0]}`;
     const headTemp = inData.args[1];
     const bodyTemp = inData.args[2];
@@ -775,6 +778,7 @@ export function apply(ctx: Context, config: Config)
   // (gets:url:headJSON:bodyJSON:getData....)
   ctx.word.statement.addStatement('gets', async (inData, session) =>
   {
+    if (!config.httpRequest) { return; }
     const url = `https://${inData.args[0]}`;
     const headTemp = inData.args[1];
     const bodyTemp = inData.args[2];
@@ -801,6 +805,7 @@ export function apply(ctx: Context, config: Config)
   // (posts:url:headJSON:bodyJSON:getData....)
   ctx.word.statement.addStatement('posts', async (inData, session) =>
   {
+    if (!config.httpRequest) { return; }
     const url = `https://${inData.args[0]}`;
     const headTemp = inData.args[1];
     const bodyTemp = inData.args[2];
@@ -823,9 +828,10 @@ export function apply(ctx: Context, config: Config)
   });
 
   // 创建https post请求
-  // (posts:url:headJSON:bodyJSON:getData....)
+  // (post:url:headJSON:bodyJSON:getData....)
   ctx.word.statement.addStatement('post', async (inData, session) =>
   {
+    if (!config.httpRequest) { return; }
     const url = `http://${inData.args[0]}`;
     const headTemp = inData.args[1];
     const bodyTemp = inData.args[2];
@@ -837,6 +843,36 @@ export function apply(ctx: Context, config: Config)
 
     const data = await httpRequest(url, 'post', head, body);
     const needDataList = inData.args.slice(3);
+    let outMsg = '';
+    needDataList.forEach(e =>
+    {
+      outMsg += String(dataSplit(structuredClone(data), e));
+    });
+
+    // console.log(outMsg)
+    return outMsg;
+  });
+
+  // 创建https post请求
+  // (http:<post/get>:url:headJSON:bodyJSON:getData....)
+  ctx.word.statement.addStatement('http', async (inData, session) =>
+  {
+    if (!config.httpRequest) { return; }
+    const url = inData.args[0];
+    const method = inData.args[1];
+    const headTemp = inData.args[2];
+    const bodyTemp = inData.args[3];
+
+    if (method != 'post' && method != 'get') { return; }
+
+    let head = null;
+    if (headTemp != '') { head = getJson(headTemp); }
+
+    let body = null;
+    if (body != '') { body = getJson(bodyTemp); }
+
+    const data = await httpRequest(url, method, head, body);
+    const needDataList = inData.args.slice(4);
     let outMsg = '';
     needDataList.forEach(e =>
     {
@@ -862,7 +898,7 @@ export function apply(ctx: Context, config: Config)
     if (args.length % 2 == 1) { return '参数数量为奇数'; }
 
 
-    const obj:weightObj[] = [];
+    const obj: weightObj[] = [];
     for (let i = 0; i < args.length; i += 2)
     {
       if (!/^\d+$/.test(args[i])) { return `${i + 1}个参数不为整数`; }
