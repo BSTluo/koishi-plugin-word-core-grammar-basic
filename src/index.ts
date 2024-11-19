@@ -502,16 +502,16 @@ export function apply(ctx: Context, config: Config)
   {
     const whichStart = inData.args[0];
 
-    // console.log(session.userId);
     if (session.content == whichStart) { return inData.parPack.kill('禁止调用自身'); }
 
     if (!session.bot) { ctx.logger('调用语法中session缺少bot属性'); return '【当前触发方式不支持调用语法】'; }
     if (!session.send) { ctx.logger('调用语法中session缺少send属性'); return '【当前触发方式不支持调用语法】'; }
     if (!session.event) { ctx.logger('调用语法中session缺少event属性'); return '【当前触发方式不支持调用语法】'; }
 
-    const test = session?.bot.session(session.event) as Session;
+    const test = session?.bot.session(clone(session.event)) as Session;
 
     test.content = whichStart;
+
     let getReturnMsg = '';
     await ctx.word.driver.start(test, async msg =>
     {
