@@ -1,4 +1,4 @@
-import { Context, HTTP, Schema, Session, clone, h, sleep } from 'koishi';
+import { Context, Schema, Session, clone, h, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
 import { numberToChinese } from './tools';
 
