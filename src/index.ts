@@ -41,6 +41,7 @@ export function apply(ctx: Context, config: Config)
     const item = inData.args[0];
     // const number = await ctx.word.user.getItem(uid, saveCell, item);
     const number = await inData.internal.getItem(uid, saveCell, item);
+    if (typeof number != 'number') { return number; }
 
     const addNumTemp = inData.args[1];
     let addNum = 0;
@@ -98,6 +99,7 @@ export function apply(ctx: Context, config: Config)
     const item = inData.args[0];
     // const number = await ctx.word.user.getItem(uid, saveCell, item);
     const number = await inData.internal.getItem(uid, saveCell, item);
+    if (typeof number != 'number') { return number; }
 
     const rmNumTemp = inData.args[1];
     let rmNum = 0;
@@ -134,14 +136,6 @@ export function apply(ctx: Context, config: Config)
     await inData.internal.saveItem(uid, saveCell, item, Math.floor(now));
 
     return String(Math.floor(rmNum));
-
-    // if (ok)
-    // {
-    //   return String(rmNum);
-    // } else
-    // {
-    //   return inData.parPack.kill(`物品 [${item}] 减少失败`);
-    // }
   });
 
   // 判断物品数量
@@ -164,9 +158,10 @@ export function apply(ctx: Context, config: Config)
       number = Number(item);
     } else
     {
-      number = await inData.internal.getItem(uid, saveCell, item);
+      const aaaa = await inData.internal.getItem(uid, saveCell, item);
+      if (typeof aaaa != 'number') { return number; }
+      number = aaaa;
     }
-
     number = (number) ? number : 0;
 
     const inputNumber = inData.args[2];
@@ -944,13 +939,60 @@ export function apply(ctx: Context, config: Config)
   });
 
   // 添加列表内容(a+:列表名:物品值:目标?/that)
+  ctx.word.statement.addStatement('a+', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const listItem = inData.args[1];
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    getListData.push(listItem);
+
+    const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
+
+    if (a)
+    {
+      return listName;
+    }
+  });
+
   // 删除列表内容(a-:列表名:物品值:目标?/that)
+  ctx.word.statement.addStatement('a-', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const listItem = inData.args[1];
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+  });
+
   // 查询列表长度(a#:列表名:目标?/that)
+  ctx.word.statement.addStatement('a#', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+  });
+
   // 获取列表的一项(ag:列表名:第几项:目标?/that)
   // 随机获取列表中的一项(ar:列表名:目标?/that)
   // 判断物品是否在列表内(a?:列表名:物品值:目标?/that)
   // 设置列表的某一项为某物品(as:列表名:物品值:项:目标?/that)
   // 输出一个列表的所有值(aa:列表名:输出格式:目标?/that)
+  // 删除重复内容(ak:列表名:目标?/that)
 
   // 获取机器人昵称(称)
   // 清空一个人的数据(kill:目标)
