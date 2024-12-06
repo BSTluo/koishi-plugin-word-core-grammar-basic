@@ -1,6 +1,7 @@
 import { METHODS } from 'http';
 import { Context, HTTP, Schema, Session, clone, h, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
+import { numberToChinese } from './tools';
 
 export const name = 'word-core-grammar-basic';
 
@@ -437,14 +438,15 @@ export function apply(ctx: Context, config: Config)
     return String(random(Number(first), Number(second)));
   });
 
-  // 获取时间(time:显示类型)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
+  // 获取时间(time:显示类型:是否为汉字)【1.年 2. 月 3. 星期 4. 日 5. 时 6. 分 7. 秒 8. 时间戳】
   ctx.word.statement.addStatement('time', async (inData, session) =>
   {
     const first = inData.args[0];
+    const isString = inData.args[1];
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     const day = new Date();
-    let time;
+    let time: number;
     switch (first)
     {
       case "1": {
@@ -492,7 +494,16 @@ export function apply(ctx: Context, config: Config)
 
     if (time)
     {
-      return String(time);
+      if (isString)
+      {
+        return numberToChinese(time);
+      } else
+      {
+        return String(time);
+      }
+    } else
+    {
+      return '';
     }
   });
 
