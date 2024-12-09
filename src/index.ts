@@ -1,6 +1,6 @@
 import { Context, Schema, Session, clone, h, sleep } from 'koishi';
 import { } from 'koishi-plugin-word-core';
-import { numberToChinese } from './tools';
+import { isNumeric, numberToChinese, randomNumber } from './tools';
 
 export const name = 'word-core-grammar-basic';
 
@@ -16,11 +16,6 @@ export const Config: Schema<Config> = Schema.object({
 });
 
 export const inject = ['word'];
-
-const randomNumber = (minNumber: number, maxNumber: number): number =>
-{
-  return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
-};
 
 export function apply(ctx: Context, config: Config)
 {
@@ -973,10 +968,28 @@ export function apply(ctx: Context, config: Config)
 
     const saveCell = inData.wordData.saveDB;
 
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    const index = getListData.indexOf(listItem);
+
+    if (index < 0)
+    {
+      return inData.parPack.kill('不存在此列表项');
+    }
+
+    const item = getListData.splice(index, 1);
+
+    const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
+
+    if (a)
+    {
+      return item[0];
+    }
   });
 
-  // 查询列表长度(a#:列表名:目标?/that)
-  ctx.word.statement.addStatement('a#', async (inData, session) =>
+  // 查询列表长度(al:列表名:目标?/that)
+  ctx.word.statement.addStatement('al', async (inData, session) =>
   {
     const listName = inData.args[0];
 
@@ -985,14 +998,181 @@ export function apply(ctx: Context, config: Config)
 
     const saveCell = inData.wordData.saveDB;
 
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    return String(getListData.length);
   });
 
-  // 获取列表的一项(ag:列表名:第几项:目标?/that)
+  // 获取列表的一项(a#:列表名:第几项:目标?/that)
+  ctx.word.statement.addStatement('a#', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const index = inData.args[1];
+    if (!isNumeric(index))
+    {
+      return inData.parPack.kill('输入内容不为数字');
+    }
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData.length <= 0)
+    {
+      return inData.parPack.kill('不存在此列表项或列表为空');
+    }
+
+    return getListData[Number(index)];
+  });
+
   // 随机获取列表中的一项(ar:列表名:目标?/that)
+  ctx.word.statement.addStatement('ar', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData.length <= 0)
+    {
+      return inData.parPack.kill('不存在此列表项或列表为空');
+    }
+
+    const index = randomNumber(0, getListData.length);
+    return getListData[index];
+  });
+
   // 判断物品是否在列表内(a?:列表名:物品值:目标?/that)
-  // 设置列表的某一项为某物品(as:列表名:物品值:项:目标?/that)
+  ctx.word.statement.addStatement('a?', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const listItem = inData.args[1];
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    const index = getListData.indexOf(listItem);
+
+    if (index < 0)
+    {
+      return inData.parPack.kill('不存在此列表项');
+    }
+
+    return String(index);
+  });
+
+  // 设置列表的某一项为某物品(as:列表名:项:物品值:目标?/that)
+  ctx.word.statement.addStatement('as', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const index = inData.args[1];
+    const listItem = inData.args[2];
+
+    if (!isNumeric(index))
+    {
+      return inData.parPack.kill('输入内容不为数字');
+    }
+
+    let uid = (inData.args.length >= 4) ? inData.args[3] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    getListData[index] = listItem;
+
+    const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
+
+    if (a)
+    {
+      return listItem;
+    }
+  });
+
   // 输出一个列表的所有值(aa:列表名:输出格式:目标?/that)
-  // 删除重复内容(ak:列表名:目标?/that)
+  ctx.word.statement.addStatement('aa', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData.length <= 0)
+    {
+      return inData.parPack.kill('不存在此列表项或列表为空');
+    }
+
+    let outMsg = getListData.map((item, index) => `${index + 1}. ${item}`).join('');
+
+    return outMsg;
+  });
+
+  // 删除重复内容(ac:列表名:目标?/that)
+  ctx.word.statement.addStatement('ac', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    let getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData.length <= 0)
+    {
+      return inData.parPack.kill('不存在此列表项或列表为空');
+    }
+
+    getListData = [...new Set(getListData)];
+
+    const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
+
+    if (!a)
+    {
+      return inData.parPack.kill('列表去重失败');
+    }
+  });
+
+  // 将列表合并输出内容(am:列表名:目标?/that)
+  ctx.word.statement.addStatement('am', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 2) ? inData.args[1] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    let getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    return getListData.join('');
+  });
+
 
   // 获取机器人昵称(称)
   // 清空一个人的数据(kill:目标)

@@ -1,4 +1,4 @@
-export const numberToChinese = (num:number) =>
+export const numberToChinese = (num: number) =>
 {
   const units = ['', '十', '百', '千', '万', '亿', '兆'];
   const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -32,4 +32,14 @@ export const numberToChinese = (num:number) =>
   str = str.replace(/^一十/, '十');
 
   return str;
+};
+
+export const isNumeric = (str: string) =>
+{
+  return !isNaN(Number(str)) && str.trim() !== ""; // 排除空字符串
+};
+
+export const randomNumber = (minNumber: number, maxNumber: number): number =>
+{
+  return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 };
