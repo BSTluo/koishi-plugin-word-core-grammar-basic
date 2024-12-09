@@ -933,7 +933,7 @@ export function apply(ctx: Context, config: Config)
     return weightedRandom(obj);
   });
 
-  // 添加列表内容(a+:列表名:物品值:目标?/that)
+  // 添加列表内容(a+:列表名:列表内容:目标?/that)
   ctx.word.statement.addStatement('a+', async (inData, session) =>
   {
     const listName = inData.args[0];
@@ -957,7 +957,7 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
-  // 删除列表内容(a-:列表名:物品值:目标?/that)
+  // 删除列表内容(a-:列表名:列表内容:目标?/that)
   ctx.word.statement.addStatement('a-', async (inData, session) =>
   {
     const listName = inData.args[0];
@@ -1004,16 +1004,19 @@ export function apply(ctx: Context, config: Config)
     return String(getListData.length);
   });
 
-  // 获取列表的一项(a#:列表名:第几项:目标?/that)
+  // 获取列表的一项(a#:列表名:序号:目标?/that)
   ctx.word.statement.addStatement('a#', async (inData, session) =>
   {
     const listName = inData.args[0];
     const index = inData.args[1];
     if (!isNumeric(index))
     {
-      return inData.parPack.kill('输入内容不为数字');
+      return inData.parPack.kill('序号不为数字');
     }
-
+    if (index == '0')
+    {
+      return inData.parPack.kill('序号需要大于1');
+    }
     let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
     if (uid == 'that') { uid = inData.matchs.id[0]; }
 
@@ -1027,7 +1030,7 @@ export function apply(ctx: Context, config: Config)
       return inData.parPack.kill('不存在此列表项或列表为空');
     }
 
-    return getListData[Number(index)];
+    return getListData[Number(index) - 1];
   });
 
   // 随机获取列表中的一项(ar:列表名:目标?/that)
@@ -1052,7 +1055,7 @@ export function apply(ctx: Context, config: Config)
     return getListData[index];
   });
 
-  // 判断物品是否在列表内(a?:列表名:物品值:目标?/that)
+  // 判断物品在列表中的序号(a?:列表名:列表内容:目标?/that)
   ctx.word.statement.addStatement('a?', async (inData, session) =>
   {
     const listName = inData.args[0];
@@ -1070,13 +1073,13 @@ export function apply(ctx: Context, config: Config)
 
     if (index < 0)
     {
-      return inData.parPack.kill('不存在此列表项');
+      return "-1";
     }
 
-    return String(index);
+    return String(index) + 1;
   });
 
-  // 设置列表的某一项为某物品(as:列表名:项:物品值:目标?/that)
+  // 设置列表的某一项为某物品(as:列表名:序号:列表内容:目标?/that)
   ctx.word.statement.addStatement('as', async (inData, session) =>
   {
     const listName = inData.args[0];
@@ -1085,7 +1088,11 @@ export function apply(ctx: Context, config: Config)
 
     if (!isNumeric(index))
     {
-      return inData.parPack.kill('输入内容不为数字');
+      return inData.parPack.kill('序号不为数字');
+    }
+    if (index == '0')
+    {
+      return inData.parPack.kill('序号需要大于1');
     }
 
     let uid = (inData.args.length >= 4) ? inData.args[3] : session.userId;
@@ -1106,7 +1113,7 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
-  // 输出一个列表的所有值(aa:列表名:输出格式:目标?/that)
+  // 输出一个列表的所有值(aa:列表名:目标?/that)
   ctx.word.statement.addStatement('aa', async (inData, session) =>
   {
     const listName = inData.args[0];
