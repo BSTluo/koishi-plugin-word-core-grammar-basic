@@ -1180,6 +1180,33 @@ export function apply(ctx: Context, config: Config)
     return getListData.join('');
   });
 
+  // 触发一个koishi指令(指令:xxx:0/1是否直接发送)
+  ctx.word.statement.addStatement('指令', async (inData, session) =>
+  {
+    const args = inData.args[0];
+    let a: string;
+
+    ctx.once('before-send', (sessionA) =>
+    {
+      a = sessionA.content;
+      return true;
+    });
+
+    if (!session.execute) { ctx.logger('调用语法中session缺少execute属性'); return '【当前触发方式不支持调用语法】'; }
+
+    const send = inData.args[1];
+
+    // 直接发送/返回
+    if (send)
+    {
+      const hList = await session.execute(args, true);
+      session.send(hList);
+    } else
+    {
+      await session.execute(args);
+      return a;
+    }
+  });
 
   // 获取机器人昵称(称)
   // 清空一个人的数据(kill:目标)
