@@ -1186,21 +1186,23 @@ export function apply(ctx: Context, config: Config)
     const args = inData.args[0];
     let a: string;
 
-    ctx.once('before-send', (sessionA) =>
+    const off = ctx.once('before-send', (sessionA) =>
     {
       a = sessionA.content;
       return true;
     });
 
     if (!session.execute) { ctx.logger('调用语法中session缺少execute属性'); return '【当前触发方式不支持调用语法】'; }
+    if (!session.send) { ctx.logger('调用语法中session缺少send属性'); return '【当前触发方式不支持调用语法】'; }
 
     const send = inData.args[1];
 
     // 直接发送/返回
-    if (send)
+    if (send == '1')
     {
       const hList = await session.execute(args, true);
-      session.send(hList);
+      off()
+      session.send(hList)
     } else
     {
       await session.execute(args);
