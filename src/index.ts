@@ -407,7 +407,24 @@ export function apply(ctx: Context, config: Config)
     if (!/^\d+$/.test(numArgs2)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     if (!/[+-/*]/.test(Operator)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
 
-    return String(Math.floor(eval(`${numArgs1}${Operator}${numArgs2}`)));
+    const MAX_SAFE = Number.MAX_SAFE_INTEGER;
+    const MIN_SAFE = Number.MIN_SAFE_INTEGER;
+
+    if (numArgs1 > MAX_SAFE || numArgs1 < MIN_SAFE)
+    {
+      return inData.parPack.kill(`Error: number 1 (${numArgs1}) is out of safe range.`);
+    }
+    if (numArgs2 > MAX_SAFE || numArgs2 < MIN_SAFE)
+    {
+      return inData.parPack.kill(`Error: number 2 (${numArgs2}) is out of safe range.`);
+    }
+
+    const result = Math.floor(eval(`${numArgs1}${Operator}${numArgs2}`));
+    if (result > MAX_SAFE || result < MIN_SAFE)
+    {
+      return inData.parPack.kill(`Error: result (${result}) is out of safe range.`);
+    }
+    return String(result);
   });
 
   // 随机数(~:a:b)生成a~b的随机数

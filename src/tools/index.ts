@@ -43,3 +43,31 @@ export const randomNumber = (minNumber: number, maxNumber: number): number =>
 {
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 };
+
+export const safeAddition = (a: number, b: number) =>
+{
+  const MAX_SAFE = Number.MAX_SAFE_INTEGER;
+  const MIN_SAFE = Number.MIN_SAFE_INTEGER;
+
+  // 检查 a 和 b 是否在安全范围内
+  if (a > MAX_SAFE || a < MIN_SAFE)
+  {
+    return `Error: a (${a}) is out of safe range.`;
+  }
+  if (b > MAX_SAFE || b < MIN_SAFE)
+  {
+    return `Error: b (${b}) is out of safe range.`;
+  }
+
+  // 计算结果
+  const result = a + b;
+
+  // 检查结果是否在安全范围内
+  if (result > MAX_SAFE || result < MIN_SAFE)
+  {
+    return `Error: result (${result}) is out of safe range.`;
+  }
+
+  // 返回安全的结果
+  return `Result: ${result}`;
+};
