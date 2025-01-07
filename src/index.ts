@@ -1103,7 +1103,7 @@ export function apply(ctx: Context, config: Config)
     const getListData = await inData.internal.getList(uid, saveCell, listName);
     if (!Array.isArray(getListData)) { return getListData; }
 
-    getListData[index] = listItem;
+    getListData[Number(index) - 1] = listItem;
 
     const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
 
@@ -1201,8 +1201,8 @@ export function apply(ctx: Context, config: Config)
     if (send == '1')
     {
       const hList = await session.execute(args, true);
-      off()
-      session.send(hList)
+      off();
+      session.send(hList);
     } else
     {
       await session.execute(args);
