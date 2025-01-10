@@ -1005,7 +1005,7 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
-  // 删除列表内容(a-:列表名:目标?/that)
+  // 删除列表内容(ak:列表名:目标?/that)
   ctx.word.statement.addStatement('ak', async (inData, session) =>
   {
     const listName = inData.args[0];
