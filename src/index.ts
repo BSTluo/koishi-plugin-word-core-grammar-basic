@@ -1005,6 +1005,32 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
+  // 删除列表内容(a-:列表名:列表内容:目标?/that)
+  ctx.word.statement.addStatement('ak', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const listItem = inData.args[1];
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    const index = getListData.indexOf(listItem);
+
+    if (index < 0)
+    {
+      return inData.parPack.kill('不存在此列表项');
+    }
+
+    const item = []
+
+    await inData.internal.saveList(uid, saveCell, listName, getListData);
+  });
+
   // 查询列表长度(al:列表名:目标?/that)
   ctx.word.statement.addStatement('al', async (inData, session) =>
   {
