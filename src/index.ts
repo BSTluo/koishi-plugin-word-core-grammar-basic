@@ -1015,7 +1015,7 @@ export function apply(ctx: Context, config: Config)
 
     const saveCell = inData.wordData.saveDB;
 
-    const getListData = []
+    const getListData = [];
 
     await inData.internal.saveList(uid, saveCell, listName, getListData);
   });
@@ -1193,6 +1193,38 @@ export function apply(ctx: Context, config: Config)
     if (!a)
     {
       return inData.parPack.kill('列表去重失败');
+    }
+  });
+
+  // 互换列表中两项的位置(ah:列表名:项1:项2:目标?/that)
+  ctx.word.statement.addStatement('ah', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+
+    let uid = (inData.args.length >= 4) ? inData.args[3] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    let getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData.length <= 0)
+    {
+      return inData.parPack.kill('不存在此列表项或列表为空');
+    }
+
+    const index1 = inData.args[1] - 1;
+    const index2 = inData.args[2] - 1;
+    const temp = getListData[index1] + '';
+    getListData[index1] = getListData[index2];
+    getListData[index2] = temp;
+
+    const a = await inData.internal.saveList(uid, saveCell, listName, getListData);
+
+    if (!a)
+    {
+      return inData.parPack.kill('列表互换失败');
     }
   });
 
