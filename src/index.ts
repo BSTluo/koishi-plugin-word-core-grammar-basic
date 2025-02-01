@@ -499,6 +499,7 @@ export function apply(ctx: Context, config: Config)
         time = Date();
         break;
       }
+
       default:
         break;
     }
