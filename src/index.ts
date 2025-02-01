@@ -452,7 +452,7 @@ export function apply(ctx: Context, config: Config)
 
     if (!/^\d+$/.test(first)) { return inData.parPack.kill('获取输入数的输入参数不正确'); }
     const day = new Date();
-    let time: number;
+    let time: number | string;
     switch (first)
     {
       case "1": {
@@ -494,15 +494,20 @@ export function apply(ctx: Context, config: Config)
         time = Date.now();
         break;
       }
+
+      case "9": {
+        time = Date();
+        break;
+      }
       default:
         break;
     }
 
     if (time)
     {
-      if (isString)
+      if (isString == '1' && first != '9')
       {
-        return numberToChinese(time);
+        return numberToChinese(time as number);
       } else
       {
         return String(time);
