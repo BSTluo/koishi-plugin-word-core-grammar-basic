@@ -976,7 +976,7 @@ export function apply(ctx: Context, config: Config)
 
     if (a)
     {
-      return listName;
+      return listItem;
     }
   });
 
