@@ -954,7 +954,7 @@ export function apply(ctx: Context, config: Config)
     }
 
     return weightedRandom(obj);
-  });
+  }, ['while', 0, 1]);
 
   // 添加列表内容(a+:列表名:列表内容:目标?/that)
   ctx.word.statement.addStatement('a+', async (inData, session) =>
