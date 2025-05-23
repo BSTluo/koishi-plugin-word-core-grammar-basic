@@ -1072,7 +1072,7 @@ export function apply(ctx: Context, config: Config)
   });
 
   // 随机获取列表中的一项(ar:列表名:目标?/that)
-  ctx.word.statement.addStatement('ar', async (inData, session) =>
+  ctx.word.statement.addStatement('a~', async (inData, session) =>
   {
     const listName = inData.args[0];
 
@@ -1094,7 +1094,7 @@ export function apply(ctx: Context, config: Config)
   });
 
   // 判断物品在列表中的序号(a?:列表名:列表内容:目标?/that)
-  ctx.word.statement.addStatement('a?', async (inData, session) =>
+  ctx.word.statement.addStatement('ar', async (inData, session) =>
   {
     const listName = inData.args[0];
     const listItem = inData.args[1];
@@ -1148,6 +1148,38 @@ export function apply(ctx: Context, config: Config)
     if (a)
     {
       return listItem;
+    }
+  });
+
+  // 判断列表的某一项是否有内容(a?:列表名:序号:目标?/that)
+  ctx.word.statement.addStatement('a?', async (inData, session) =>
+  {
+    const listName = inData.args[0];
+    const index = inData.args[1];
+
+    if (!isNumeric(index))
+    {
+      return inData.parPack.kill('序号不为数字');
+    }
+    if (index == '0')
+    {
+      return inData.parPack.kill('序号需要大于1');
+    }
+
+    let uid = (inData.args.length >= 3) ? inData.args[2] : session.userId;
+    if (uid == 'that') { uid = inData.matchs.id[0]; }
+
+    const saveCell = inData.wordData.saveDB;
+
+    const getListData = await inData.internal.getList(uid, saveCell, listName);
+    if (!Array.isArray(getListData)) { return getListData; }
+
+    if (getListData[Number(index) - 1])
+    {
+      return "1";
+    } else
+    {
+      return "0";
     }
   });
 
