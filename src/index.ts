@@ -134,7 +134,7 @@ export function apply(ctx: Context, config: Config)
   });
 
   // 判断物品数量
-  // 语法: (?:物品名称/数字:关系:数量:信息?:用户id?)
+  // 语法: (?:物品名称/数字:关系:数量:信息?:用户id?:否则信息?)
   // 物品名称现在支持数字
   // 谁可以为that，匹配问中第一个at的id
   // 不写可选元素时，目标为整个语句
@@ -192,13 +192,20 @@ export function apply(ctx: Context, config: Config)
         if (inData.args[3] == '')
         {
           return inData.parPack.next();
-        } else { return ''; } // [bug] 内部不应该执行，但是执行且无法撤销
+        } else
+        {
+          if (inData.args.length >= 6)
+          {
+            return inData.args[5];
+          } else { return ''; }
+
+        }
       } else
       {
         return inData.parPack.next();
       }
     }
-  }, [0, 1, 1, 1]);
+  }, [0, 1, 1, 1, 0, 1, 0]);
 
   // 延迟发送信息
   // 语法(&:时间:消息？)
