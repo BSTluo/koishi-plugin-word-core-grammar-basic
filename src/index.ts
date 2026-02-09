@@ -1319,6 +1319,27 @@ export function apply(ctx: Context, config: Config)
     }
   });
 
-  // 获取机器人昵称(称)
+  // 清空一个人的存储格子(clear:目标)
+  ctx.word.statement.addStatement('clear', async (inData, session) =>
+  {
+    let uid = (inData.args.length >= 1) ? inData.args[0] : session.userId;
+    const saveCell = inData.wordData.saveDB;
+
+    await inData.internal.clearUserData(uid, saveCell);
+
+    return '';
+  });
+
   // 清空一个人的数据(kill:目标)
+  ctx.word.statement.addStatement('kill', async (inData, session) =>
+  {
+    let uid = (inData.args.length >= 1) ? inData.args[0] : session.userId;
+    const saveCell = inData.wordData.saveDB;
+
+    await inData.internal.killUserData(uid);
+
+    return '';
+  });
+
+  // 获取机器人昵称(称)
 }
